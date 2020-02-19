@@ -2,22 +2,27 @@ package gestMessages.components;
 
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.annotations.OfferedInterfaces;
+import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.InvariantException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
 import fr.sorbonne_u.components.ports.PortI;
 import gestMessages.interfaces.PublicationCI;
+import gestMessages.interfaces.ReceptionCI;
 import gestMessages.ports.PublicationInboundPort;
+import gestMessages.ports.ReceptionOutboundPort;
 import messages.MessageI;
+
+@RequiredInterfaces(required = {ReceptionCI.class})
 @OfferedInterfaces(offered = {PublicationCI.class})
 public class Broker extends AbstractComponent {
 
 	protected String		uriPrefix ;
-
+	protected ReceptionOutboundPort rop;
 	protected Broker(int nbThreads, int nbSchedulableThreads) {
 		super(nbThreads, nbSchedulableThreads);
-		System.out.println("bien parti");
+		//System.out.println("bien parti");
 		// TODO Auto-generated constructor stub
 	}
 
@@ -53,7 +58,7 @@ public class Broker extends AbstractComponent {
 		this.logMessage("starting broker component.") ;
 		super.start();
 
-		System.out.println("Broker Start End");
+		//System.out.println("Broker Start End");
 	}
 	
 	@Override
