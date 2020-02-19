@@ -59,8 +59,8 @@ public class Broker extends AbstractComponent {
 	@Override
 	public void			finalise() throws Exception
 	{
-		this.logMessage("stopping provider component.") ;
-		this.printExecutionLogOnFile("provider") ;
+		this.logMessage("stopping broker component.") ;
+		this.printExecutionLogOnFile("broker") ;
 		super.finalise();
 	}
 

@@ -1,7 +1,6 @@
 package gestMessages;
 
 import fr.sorbonne_u.components.AbstractComponent;
-import fr.sorbonne_u.components.AbstractComponentHelper;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import gestMessages.components.Broker;
 import gestMessages.components.Publisher;
@@ -50,7 +49,7 @@ public class CVM extends AbstractCVM {
 		this.publisherURI =
 			AbstractComponent.createComponent(
 					Publisher.class.getCanonicalName(),
-					new Object[]{PUBLISHER_COMPONENT_URI, PublicationOutboundPortURI,1,0}) ;
+					new Object[]{PUBLISHER_COMPONENT_URI, PublicationOutboundPortURI}) ;
 		assert	this.isDeployedComponent(this.publisherURI) ;
 		// make it trace its operations; comment and uncomment the line to see
 		// the difference
@@ -67,9 +66,9 @@ public class CVM extends AbstractCVM {
 				PublicationOutboundPortURI,
 				PublicationInboundPortURI,
 				PublicationConnector.class.getCanonicalName()) ;
-		System.out.println("connection debut");
+		//System.out.println("connection debut");
 		super.deploy();
-		System.out.println("deploy");
+		//System.out.println("deploy");
 		assert	this.deploymentDone() ;
 	}
 

@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/users/Etu6/3415266/jarsCPS/BCM4Java-30012020.jar/BCM4Java-30012020.jar"/>
-	<classpathentry kind="lib" path="/users/nfs/Etu6/3415266/jarsCPS/commons-math3-3.5.jar/commons-math3-3.5.jar"/>
-	<classpathentry kind="lib" path="/users/nfs/Etu6/3415266/jarsCPS/javassist.jar/javassist.jar"/>
+	<classpathentry kind="lib" path="F:/Programmation/javajars/BCM4Java-30012020.jar"/>
+	<classpathentry kind="lib" path="F:/Programmation/javajars/commons-math3-3.5.jar"/>
+	<classpathentry kind="lib" path="F:/Programmation/javajars/javassist.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
