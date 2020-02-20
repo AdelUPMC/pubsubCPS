@@ -15,7 +15,7 @@ import messages.MessageI;
 public class Subscriber extends AbstractComponent {
 
 	protected String		uriPrefix ;
-	public Subscriber(int nbThreads, int nbSchedulableThreads) {
+	protected Subscriber(int nbThreads, int nbSchedulableThreads) {
 		super(nbThreads, nbSchedulableThreads);
 		// TODO Auto-generated constructor stub
 	}
@@ -36,7 +36,9 @@ public class Subscriber extends AbstractComponent {
 	}
 	
 	public void acceptMessageService(MessageI m) throws Exception {
-		System.out.println("accept message : uri="+m.getURI());
+		System.out.println("accept message : URI="+m.getURI());
+		if (m.getPayload() instanceof String)
+			System.out.println("contenu du message: "+((String)m.getPayload()));
 	}
 	public void acceptMessagesService(MessageI[] ms) throws Exception {
 		System.out.println("accept messages :");
@@ -47,11 +49,9 @@ public class Subscriber extends AbstractComponent {
 	
 	public void			start() throws ComponentStartException
 	{
-		System.out.println("Subscriber Start ");
+		System.out.println("Subscriber Start !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		this.logMessage("starting subscriber component.") ;
 		super.start();
-
-		//System.out.println("Subscriber Start End");
 	}
 	@Override
 	public void			finalise() throws Exception
@@ -65,6 +65,7 @@ public class Subscriber extends AbstractComponent {
 	@Override
 	public void			shutdown() throws ComponentShutdownException
 	{
+		System.out.println("Shutdown Sub");
 		try {
 			PortI[] p = this.findPortsFromInterface(ReceptionCI.class) ;
 			p[0].unpublishPort() ;

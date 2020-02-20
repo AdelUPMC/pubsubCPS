@@ -22,32 +22,35 @@ public class Message implements MessageI {
 		long time=Instant.now().getEpochSecond();
 		t= new TimeStamp(time,timestamper);
 		id=java.util.UUID.randomUUID().toString();
+		System.out.println("URRRRIIIIIII");
+		System.out.println(id);
 		this.p=p;
 		this.content=content;
 	}
-
 	@Override
 	public String getURI() {
 		// TODO Auto-generated method stub
-		return null;
+		return id;
 	}
 
 	@Override
 	public TimeStamp getTimeStamp() {
 		// TODO Auto-generated method stub
-		return null;
+		return t;
 	}
 
 	@Override
 	public Properties getProperties() {
 		// TODO Auto-generated method stub
-		return null;
+		return p;
 	}
 
 	@Override
 	public Serializable getPayload() {
 		// TODO Auto-generated method stub
-		return null;
+		return content;
 	}
+
+	
 
 }

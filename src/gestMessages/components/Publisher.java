@@ -14,31 +14,13 @@ import messages.MessageI;
 @RequiredInterfaces(required = {PublicationCI.class})
 public class Publisher extends AbstractComponent {
 	protected PublicationOutboundPort	portO;
-	/*
-	protected Publisher(int nbThreads, int nbSchedulableThreads) {
-		super(nbThreads, nbSchedulableThreads);
-	}
-	*/
-	
-	/* old:
-	protected Publisher(String uri, String reflectionOutboundPortURI, int nbThreads, int nbSchedulableThreads) throws Exception {
-		super(uri, nbThreads, nbSchedulableThreads);
-		// TODO Auto-generated constructor stub
-		portO =	new PublicationOutboundPort(reflectionOutboundPortURI, this) ;
-		// publish the port (an outbound port is always local)
-		this.portO.localPublishPort();;
-		this.tracer.setTitle("Publisher") ;
-		this.tracer.setRelativePosition(1, 1) ;
-	
-	}
-	*/
 	
 	protected Publisher(String uri, String outboundPortURI) throws Exception {
-		super(uri, 0, 1) ;
+		super(uri, 1, 1) ;
 		// TODO Auto-generated constructor stub
 		this.portO =	new PublicationOutboundPort(outboundPortURI, this) ;
 		// publish the port (an outbound port is always local)
-		this.portO.localPublishPort();;
+		this.portO.localPublishPort();
 		
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
@@ -60,19 +42,7 @@ public class Publisher extends AbstractComponent {
 			//System.out.println("Presque !!");
 			e.printStackTrace();
 				}
-		this.scheduleTask(
-				new AbstractComponent.AbstractTask() {
-					@Override
-					public void run() {
-						try {
-							((Publisher)this.getTaskOwner()).testConnection();
-												 ;
-						} catch (Exception e) {
-							throw new RuntimeException(e) ;
-						}
-					}
-				},
-				1000, TimeUnit.MILLISECONDS) ;
+		
 	}
 	
 	public void			start() throws ComponentStartException
@@ -86,10 +56,8 @@ public class Publisher extends AbstractComponent {
 				@Override
 				public void run() {
 					try {
-						//System.out.println("PREEEEEESQUE");
 						((Publisher)this.getTaskOwner()).testConnection();
 					} catch (Exception e) {
-					//	System.out.println("pp PREEEEEESQUE");
 						throw new RuntimeException(e) ;
 					}
 				}

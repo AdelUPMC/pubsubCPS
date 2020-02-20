@@ -4,42 +4,42 @@ import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import gestMessages.components.Broker;
 import gestMessages.components.Publisher;
+import gestMessages.components.Subscriber;
 import gestMessages.connectors.PublicationConnector;
+import gestMessages.connectors.ReceptionConnector;
 
 public class CVM extends AbstractCVM {
 	/** URI of the provider component (convenience)**/
 	protected static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
 	/** URI of the consumer component (convenience).						*/
 	protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
+	/** URI of the provider component (convenience)**/
+	protected static final String	SUBSCRIBER_COMPONENT_URI = "my-URI-subscriber" ;
 	/** URI of the provider outbound port (simplifies the connection).	*/
 	protected static final String	PublicationOutboundPortURI = "publication-outboundport" ;
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	PublicationInboundPortURI = "publication-inboundport" ;
+	/** URI of the consumer inbound port (simplifies the connection).		*/
+	protected static final String	ReceptionOutboundPortURI = "reception-outboundport"; 
+	/** URI of the consumer inbound port (simplifies the connection).		*/
+	protected static final String	ReceptionInboundPortURI = "reception-inboundport";
 
 	public CVM() throws Exception {
 		// TODO Auto-generated constructor stub
 	}
 	protected String	brokerURI ;
 	protected String	publisherURI ;
+	protected String	subscriberURI ;
 	
 	@Override
 	public void			deploy() throws Exception
 	{
 		assert	!this.deploymentDone() ;
 
-		// create the broker component
-		
-		System.out.println("Debut !!!");
-		
 		this.brokerURI =
 			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
-					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,1,0}) ;
-		System.out.println("!!!!");
+					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,2,1, ReceptionOutboundPortURI}) ;
 		assert	this.isDeployedComponent(this.brokerURI) ;
-		System.out.println("!!!!");
-
-		// make it trace its operations; comment and uncomment the line to see
-		// the difference
 		this.toggleTracing(this.brokerURI) ;
 		this.toggleLogging(this.brokerURI) ;
 
@@ -51,24 +51,41 @@ public class CVM extends AbstractCVM {
 					Publisher.class.getCanonicalName(),
 					new Object[]{PUBLISHER_COMPONENT_URI, PublicationOutboundPortURI}) ;
 		assert	this.isDeployedComponent(this.publisherURI) ;
-		// make it trace its operations; comment and uncomment the line to see
-		// the difference
 		this.toggleTracing(this.publisherURI) ;
 		this.toggleLogging(this.publisherURI) ;
 		System.out.println("publisher cree");
+		
+		
+		this.subscriberURI =
+				AbstractComponent.createComponent(
+						Subscriber.class.getCanonicalName(),
+						new Object[]{SUBSCRIBER_COMPONENT_URI,ReceptionInboundPortURI,1,1}) ;
+			assert	this.isDeployedComponent(this.subscriberURI) ;
+
+			this.toggleTracing(this.subscriberURI) ;
+			this.toggleLogging(this.subscriberURI) ;
+			System.out.println("subscriber cree");
+
 		// --------------------------------------------------------------------
 		// Connection phase
 		// --------------------------------------------------------------------
-	
-		// do the connection
+		
+		//connection de l'outboundport du publisher vers l'inbound du broker
 		this.doPortConnection(
 				this.publisherURI,
 				PublicationOutboundPortURI,
 				PublicationInboundPortURI,
 				PublicationConnector.class.getCanonicalName()) ;
-		//System.out.println("connection debut");
+	
+		//connection de l'outboundport du broker vers l'inbound du subscriber	
+		this.doPortConnection(
+				this.brokerURI,
+				ReceptionOutboundPortURI,
+				ReceptionInboundPortURI,
+				ReceptionConnector.class.getCanonicalName()) ;
+		
+		
 		super.deploy();
-		//System.out.println("deploy");
 		assert	this.deploymentDone() ;
 	}
 
@@ -83,6 +100,10 @@ public class CVM extends AbstractCVM {
 		this.doPortDisconnection(
 				this.publisherURI,
 				PublicationOutboundPortURI) ;
+		
+		this.doPortDisconnection(
+				this.brokerURI,
+				ReceptionOutboundPortURI) ;
 
 		super.finalise();
 	}
