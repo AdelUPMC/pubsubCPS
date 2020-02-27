@@ -30,24 +30,24 @@ public class PublicationInboundPort extends AbstractInboundPort implements Publi
 
 	@Override
 	public void publish(MessageI m, String topic) throws Exception {
-			((Broker)this.getOwner()).publishService(m, topic);
+			((Broker)this.getOwner()).publish(m, topic);
 	}
 
 	@Override
 	public void publish(MessageI m, String[] topics) throws Exception {
-		((Broker)this.getOwner()).publishService(m, topics);
+		((Broker)this.getOwner()).publish(m, topics);
 
 	}
 
 	@Override
 	public void publish(MessageI[] ms, String topic) throws Exception {
-		((Broker)this.getOwner()).publishService(ms, topic);
+		((Broker)this.getOwner()).publish(ms, topic);
 
 	}
 
 	@Override
 	public void publish(MessageI[] ms, String[] topics) throws Exception {
-		((Broker)this.getOwner()).publishService(ms, topics);
+		((Broker)this.getOwner()).publish(ms, topics);
 
 	}
 

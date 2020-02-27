@@ -9,7 +9,7 @@ public class ManagementOutboundPort extends AbstractOutboundPort implements Mana
 
 	public ManagementOutboundPort(String uri,ComponentI owner) throws Exception {
 		super(uri, ManagementCI.class, owner);
-		// TODO Auto-generated constructor stub
+		/// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -17,7 +17,6 @@ public class ManagementOutboundPort extends AbstractOutboundPort implements Mana
 	 */
 	private static final long serialVersionUID = 1L;
 
-	
 
 	@Override
 	public void subscribe(String topic, String inboundPortUri) throws Exception {
@@ -50,6 +49,7 @@ public class ManagementOutboundPort extends AbstractOutboundPort implements Mana
 
 	@Override
 	public void createTopic(String topic) throws Exception {
+		System.out.println("connector :" + connector);
 		((ManagementCI)this.connector).createTopic(topic);
 		
 	}

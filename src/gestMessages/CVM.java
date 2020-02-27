@@ -5,6 +5,7 @@ import fr.sorbonne_u.components.cvm.AbstractCVM;
 import gestMessages.components.Broker;
 import gestMessages.components.Publisher;
 import gestMessages.components.Subscriber;
+import gestMessages.connectors.ManagementConnector;
 import gestMessages.connectors.PublicationConnector;
 import gestMessages.connectors.ReceptionConnector;
 
@@ -24,6 +25,10 @@ public class CVM extends AbstractCVM {
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	ReceptionInboundPortURI = "reception-inboundport";
 
+	protected static final String	ManagementOutboundPortURIpub = "management-outboundportpub";
+	protected static final String	ManagementOutboundPortURIsub = "management-outboundportsub"; 
+	/** URI of the consumer inbound port (simplifies the connection).		*/
+	protected static final String	ManagementInboundPortURI = "management-inboundport";
 	public CVM() throws Exception {
 		// TODO Auto-generated constructor stub
 	}
@@ -38,7 +43,7 @@ public class CVM extends AbstractCVM {
 
 		this.brokerURI =
 			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
-					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,2,1, ReceptionOutboundPortURI}) ;
+					new Object[]{BROKER_COMPONENT_URI,1,1,PublicationInboundPortURI,ManagementInboundPortURI,ReceptionOutboundPortURI}) ;
 		assert	this.isDeployedComponent(this.brokerURI) ;
 		this.toggleTracing(this.brokerURI) ;
 		this.toggleLogging(this.brokerURI) ;
@@ -49,7 +54,7 @@ public class CVM extends AbstractCVM {
 		this.publisherURI =
 			AbstractComponent.createComponent(
 					Publisher.class.getCanonicalName(),
-					new Object[]{PUBLISHER_COMPONENT_URI, PublicationOutboundPortURI}) ;
+					new Object[]{PUBLISHER_COMPONENT_URI,1,1,PublicationOutboundPortURI,ManagementOutboundPortURIpub}) ;
 		assert	this.isDeployedComponent(this.publisherURI) ;
 		this.toggleTracing(this.publisherURI) ;
 		this.toggleLogging(this.publisherURI) ;
@@ -59,13 +64,15 @@ public class CVM extends AbstractCVM {
 		this.subscriberURI =
 				AbstractComponent.createComponent(
 						Subscriber.class.getCanonicalName(),
-						new Object[]{SUBSCRIBER_COMPONENT_URI,ReceptionInboundPortURI,1,1}) ;
+						new Object[]{SUBSCRIBER_COMPONENT_URI,1,1,ReceptionInboundPortURI,ManagementOutboundPortURIsub});	
 			assert	this.isDeployedComponent(this.subscriberURI) ;
 
 			this.toggleTracing(this.subscriberURI) ;
 			this.toggleLogging(this.subscriberURI) ;
 			System.out.println("subscriber cree");
 
+			
+				
 		// --------------------------------------------------------------------
 		// Connection phase
 		// --------------------------------------------------------------------
@@ -76,7 +83,7 @@ public class CVM extends AbstractCVM {
 				PublicationOutboundPortURI,
 				PublicationInboundPortURI,
 				PublicationConnector.class.getCanonicalName()) ;
-	
+		
 		//connection de l'outboundport du broker vers l'inbound du subscriber	
 		this.doPortConnection(
 				this.brokerURI,
@@ -85,6 +92,18 @@ public class CVM extends AbstractCVM {
 				ReceptionConnector.class.getCanonicalName()) ;
 		
 		
+		this.doPortConnection(
+				this.publisherURI,
+				ManagementOutboundPortURIpub,
+				ManagementInboundPortURI,
+				ManagementConnector.class.getCanonicalName()) ;
+		
+		this.doPortConnection(
+				this.subscriberURI,
+				ManagementOutboundPortURIsub,
+				ManagementInboundPortURI,
+				ManagementConnector.class.getCanonicalName()) ;
+		
 		super.deploy();
 		assert	this.deploymentDone() ;
 	}
@@ -92,6 +111,7 @@ public class CVM extends AbstractCVM {
 	/**
 	 * @see fr.sorbonne_u.components.cvm.AbstractCVM#finalise()
 	 */
+	
 	@Override
 	public void				finalise() throws Exception
 	{
@@ -104,8 +124,16 @@ public class CVM extends AbstractCVM {
 		this.doPortDisconnection(
 				this.brokerURI,
 				ReceptionOutboundPortURI) ;
+		
+		this.doPortDisconnection(
+				this.publisherURI,
+				ManagementOutboundPortURIpub) ;
 
-		super.finalise();
+		this.doPortDisconnection(
+				this.subscriberURI,
+				ManagementOutboundPortURIsub) ;
+		
+	//	super.finalise();
 	}
 
 	/**
@@ -123,10 +151,10 @@ public class CVM extends AbstractCVM {
 	@Override
 	public void				shutdown() throws Exception
 	{
-		assert	this.allFinalised() ;
+		//assert	this.allFinalised() ;
 		// any disconnection not done yet can be performed here
 
-		super.shutdown();
+		//super.shutdown();
 	}
 
 	public static void		main(String[] args)
@@ -135,9 +163,9 @@ public class CVM extends AbstractCVM {
 			// Create an instance of the defined component virtual machine.
 			CVM a = new CVM() ;
 			// Execute the application.
-			a.startStandardLifeCycle(20000L) ;
+			a.startStandardLifeCycle(2500L) ;
 			// Give some time to see the traces (convenience).
-			Thread.sleep(5000L) ;
+			Thread.sleep(2000L) ;
 			// Simplifies the termination (termination has yet to be treated
 			// properly in BCM).
 			System.exit(0) ;
