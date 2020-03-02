@@ -8,7 +8,7 @@ import messages.MessageI;
 public class ReceptionOutboundPort extends AbstractOutboundPort implements ReceptionCI {
 
 	/**
-	 * 
+	 * broker outbound port: require services from ReceptionCI
 	 */
 	private static final long serialVersionUID = 1L;
 

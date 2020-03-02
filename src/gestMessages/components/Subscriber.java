@@ -51,12 +51,12 @@ public class Subscriber extends AbstractComponent {
 		this.tracer.setRelativePosition(1, 1) ;
 	}
 	
-	public void acceptMessageService(MessageI m) throws Exception {
+	public void acceptMessage(MessageI m) throws Exception {
 		System.out.println("accept message : URI="+m.getURI());
 		if (m.getPayload() instanceof String)
 			System.out.println("contenu du message: "+((String)m.getPayload()));
 	}
-	public void acceptMessagesService(MessageI[] ms) throws Exception {
+	public void acceptMessages(MessageI[] ms) throws Exception {
 		System.out.println("accept messages :");
 		for(int i=0;i<ms.length;i++) {
 			System.out.println("message "+i+" : uri="+ms[i].getURI());

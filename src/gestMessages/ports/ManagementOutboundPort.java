@@ -7,16 +7,19 @@ import messages.MessageFilterI;
 
 public class ManagementOutboundPort extends AbstractOutboundPort implements ManagementCI{
 
-	public ManagementOutboundPort(String uri,ComponentI owner) throws Exception {
-		super(uri, ManagementCI.class, owner);
-		/// TODO Auto-generated constructor stub
-	}
-
 	/**
-	 * 
+	 * publishers or subscribers outbound ports: require the services from ManagementCI
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public ManagementOutboundPort(ComponentI owner) throws Exception {
+		super(ManagementCI.class, owner);
+		assert	owner != null ;
+	}
+	public ManagementOutboundPort(String uri,ComponentI owner) throws Exception {
+		super(uri, ManagementCI.class, owner);
+		assert	uri != null && owner != null ;
+	}
 
 	@Override
 	public void subscribe(String topic, String inboundPortUri) throws Exception {
@@ -49,7 +52,6 @@ public class ManagementOutboundPort extends AbstractOutboundPort implements Mana
 
 	@Override
 	public void createTopic(String topic) throws Exception {
-		System.out.println("connector :" + connector);
 		((ManagementCI)this.connector).createTopic(topic);
 		
 	}

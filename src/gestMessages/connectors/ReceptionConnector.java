@@ -5,11 +5,6 @@ import gestMessages.interfaces.ReceptionCI;
 import messages.MessageI;
 
 public class ReceptionConnector extends AbstractConnector implements ReceptionCI {
-
-	public ReceptionConnector() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
 	
 	@Override
 	public void acceptMessage(MessageI m) throws Exception {

@@ -1,93 +1,92 @@
 package messages;
 
-public class Properties {
-	String name;
-	boolean propbool;
-	byte popbyte;
-	char propchar;
-	double propdouble;
-	float propfloat;
-	int propint;
-	long proplong;
-	short propshort;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class Properties implements Serializable {
 	
-	String propstring;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8289798615516456793L;
+	Map<String, Object> prop;
 	
 	public Properties() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-	public Properties(String name, boolean propbool, byte popbyte, char propchar, double propdouble, float propfloat,
-			int propint, long proplong, short propshort, String propstring) {
-		super();
-		this.name = name;
-		this.propbool = propbool;
-		this.popbyte = popbyte;
-		this.propchar = propchar;
-		this.propdouble = propdouble;
-		this.propfloat = propfloat;
-		this.propint = propint;
-		this.proplong = proplong;
-		this.propshort = propshort;
-		this.propstring = propstring;
-	}
-	public boolean isPropbool() {
-		return propbool;
-	}
-	public void putProp(boolean propbool) {
-		this.propbool = propbool;
-	}
-	public byte getByteProp() {
-		return popbyte;
-	}
-	public void putProp(byte popbyte) {
-		this.popbyte = popbyte;
-	}
-	public char getCharProp() {
-		return propchar;
-	}
-	public void putProp(char propchar) {
-		this.propchar = propchar;
-	}
-	public double getDoubleProp() {
-		return propdouble;
-	}
-	public void putProp(double propdouble) {
-		this.propdouble = propdouble;
-	}
-	public float getFloatProp() {
-		return propfloat;
-	}
-	public void putProp(float propfloat) {
-		this.propfloat = propfloat;
-	}
-	public int getIntProp() {
-		return propint;
-	}
-	public void putProp(int propint) {
-		this.propint = propint;
-	}
-	public long getLongProp() {
-		return proplong;
-	}
-	public void putProp(long proplong) {
-		this.proplong = proplong;
-		
-	}
-	public short getShortProp() {
-		return propshort;
-	}
-	public void putProp(short propshort) {
-		this.propshort = propshort;
-	}
-	public String getStringProp() {
-		return propstring;
-	}
-	public void putProp(String propstring) {
-		this.propstring = propstring;
+		this.prop = new HashMap<String, Object>();
 	}
 	
+	public void putProp(String name, Boolean v) {
+		this.prop.put(name, v);
+	}
 
-	
+	public void putProp(String name, Byte v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Character v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Double v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Float v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Integer v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Long v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, Short v) {
+		this.prop.put(name, v);
+	}
+
+	public void putProp(String name, String v) {
+		this.prop.put(name, v);
+	}
+
+	public Boolean getBooleanProp(String name) {
+		return (Boolean) this.prop.get(name);
+	}
+
+	public Byte getByteProp(String name) {
+		return (Byte) this.prop.get(name);
+	}
+
+	public Character getCharProp(String name) {
+		return (Character) this.prop.get(name);
+	}
+
+	public Double getDoubleProp(String name) {
+		return (Double) this.prop.get(name);
+	}
+
+	public Float getFloatProp(String name) {
+		return (Float) this.prop.get(name);
+	}
+
+	public Integer getIntProp(String name) {
+		return (Integer) this.prop.get(name);
+	}
+
+	public Long getLongProp(String name) {
+		return (Long) this.prop.get(name);
+	}
+
+	public Short getShortProp(String name) {
+		return (Short) this.prop.get(name);
+	}
+
+	public String getStringProp(String name) {
+		return (String) this.prop.get(name);
+	}
 	
 }

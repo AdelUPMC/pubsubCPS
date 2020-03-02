@@ -6,10 +6,6 @@ import messages.MessageFilterI;
 
 public class ManagementConnector extends AbstractConnector implements ManagementCI {
 
-	public ManagementConnector() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public void subscribe(String topic, String inboundPortUri) throws Exception {
 		((ManagementCI)this.offering).subscribe(topic, inboundPortUri);

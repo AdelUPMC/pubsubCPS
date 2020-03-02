@@ -8,27 +8,21 @@ import messages.MessageI;
 public class PublicationOutboundPort extends AbstractOutboundPort implements PublicationCI {
 
 	/**
-	 * 
+	 * publishers outbound ports: require services from PublicationCI
 	 */
 	private static final long serialVersionUID = 1L;
 
+	
+	public PublicationOutboundPort( ComponentI owner) throws Exception {
+		super(PublicationCI.class, owner);
+		assert	owner != null ;
+	}
 	
 	public PublicationOutboundPort(String uri, ComponentI owner) throws Exception {
 		super(uri, PublicationCI.class, owner);
 		assert	uri != null && owner != null ;
 	}
-	public PublicationOutboundPort( ComponentI owner) throws Exception {
-		super(PublicationCI.class, owner);
-		assert	owner != null ;
-	}
-
 	
-	/*
-	public PublicationOutboundPort(String uri, Class<?> implementedInterface, ComponentI owner) throws Exception {
-		super(uri, implementedInterface, owner);
-		// TODO Auto-generated constructor stub
-	}
-	*/
 	
 	@Override
 	public void publish(MessageI m, String topic) throws Exception {

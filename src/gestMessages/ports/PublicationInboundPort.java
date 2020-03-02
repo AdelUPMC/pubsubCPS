@@ -1,5 +1,6 @@
 package gestMessages.ports;
 
+import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractInboundPort;
 import gestMessages.components.Broker;
@@ -9,45 +10,81 @@ import messages.MessageI;
 public class PublicationInboundPort extends AbstractInboundPort implements PublicationCI {
 
 	/**
-	 * 
+	 * broker inbound port : provide  the services of PublicationCI
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PublicationInboundPort(Class<?> implementedInterface, ComponentI owner) throws Exception {
-		super(implementedInterface, owner);
-		// TODO Auto-generated constructor stub
+	public PublicationInboundPort(ComponentI owner) throws Exception {
+		super(PublicationCI.class, owner);
+		assert	owner != null ;
 	}
-
+	
 	public PublicationInboundPort(String uri, ComponentI owner) throws Exception {
 		super(uri, PublicationCI.class, owner);
-		// TODO Auto-generated constructor stub
+		assert	uri != null && owner != null ;
 	}
-
-	public PublicationInboundPort(String uri, Class<?> implementedInterface, ComponentI owner) throws Exception {
-		super(uri, implementedInterface, owner);
-		// TODO Auto-generated constructor stub
-	}
-
+	
 	@Override
 	public void publish(MessageI m, String topic) throws Exception {
-			((Broker)this.getOwner()).publish(m, topic);
+		//((Broker)this.getOwner()).publish(m, topic);
+		this.owner.handleRequestAsync(
+				new AbstractComponent.AbstractService<Void>() {
+					@Override
+					public Void call() throws Exception {
+						((Broker)this.getServiceOwner()).publish(m, 
+								topic);
+						return null;
+						
+					}
+				});
+	
 	}
 
 	@Override
 	public void publish(MessageI m, String[] topics) throws Exception {
-		((Broker)this.getOwner()).publish(m, topics);
+		//((Broker)this.getOwner()).publish(m, topics);
+		this.owner.handleRequestAsync(
+				new AbstractComponent.AbstractService<Void>() {
+					@Override
+					public Void call() throws Exception {
+						((Broker)this.getServiceOwner()).publish(m, 
+								topics);
+						return null;
+						
+					}
+				});
 
 	}
 
 	@Override
 	public void publish(MessageI[] ms, String topic) throws Exception {
-		((Broker)this.getOwner()).publish(ms, topic);
+		//((Broker)this.getOwner()).publish(ms, topic);
+		this.owner.handleRequestAsync(
+				new AbstractComponent.AbstractService<Void>() {
+					@Override
+					public Void call() throws Exception {
+						((Broker)this.getServiceOwner()).publish(ms, 
+								topic);
+						return null;
+						
+					}
+				});
 
 	}
 
 	@Override
 	public void publish(MessageI[] ms, String[] topics) throws Exception {
-		((Broker)this.getOwner()).publish(ms, topics);
+		//((Broker)this.getOwner()).publish(ms, topics);
+		this.owner.handleRequestAsync(
+				new AbstractComponent.AbstractService<Void>() {
+					@Override
+					public Void call() throws Exception {
+						((Broker)this.getServiceOwner()).publish(ms, 
+								topics);
+						return null;
+						
+					}
+				});
 
 	}
 

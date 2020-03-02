@@ -6,13 +6,6 @@ import messages.MessageI;
 
 public class PublicationConnector extends AbstractConnector implements PublicationCI {
 
-	
-
-	public PublicationConnector() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public void publish(MessageI m, String topic) throws Exception{
 		((PublicationCI)this.offering).publish(m, topic);

@@ -65,7 +65,7 @@ public class Publisher extends AbstractComponent {
 	public void testpublish()
 	{
 		try {
-			this.portO.publish(new Message(null,"je tente la publication"), "UPMC");
+			this.portO.publish(new Message(null,null,null,"je tente la publication"), "UPMC");
 			this.logMessage("publisher published a new message ") ;
 		} catch (Exception e) {
 			//System.out.println("Presque !!");

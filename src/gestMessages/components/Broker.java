@@ -166,10 +166,9 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	{
 		try {
 			Properties p= new Properties();
-			p.putProp("Pays= France");
-			//p.put
+			p.putProp("auteur", "Andrzej Sapkowski");
 			System.out.println("Pre accept message");
-			this.rop.acceptMessage(new Message(p,new String("allez les bleus!")));
+			this.rop.acceptMessage(new Message(null,null,p,new String("allez les bleus!")));
 			System.out.println("Post accept message");
 			this.logMessage("broker  appelle accept message") ;
 		} catch (Exception e) {
@@ -179,6 +178,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		
 		
 	}
+	
 	
 	public void			start() throws ComponentStartException
 	{
