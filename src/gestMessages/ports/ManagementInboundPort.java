@@ -20,7 +20,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	}
 
 	public ManagementInboundPort(String uri, ComponentI owner) throws Exception {
-		super(uri, ReceptionCI.class, owner);
+		super(uri, ManagementCI.class, owner);
 		// TODO Auto-generated constructor stub
 	}
 	public ManagementInboundPort(String uri, Class<?> implementedInterface, ComponentI owner) throws Exception {
