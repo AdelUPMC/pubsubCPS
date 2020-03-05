@@ -5,8 +5,10 @@ import java.util.concurrent.TimeUnit;
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
+import fr.sorbonne_u.components.examples.pipeline.connectors.ManagementConnector;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
+import gestMessages.connectors.PublicationConnector;
 import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.PublicationCI;
 import gestMessages.ports.ManagementOutboundPort;
@@ -19,26 +21,45 @@ import messages.MessageI;
 public class Publisher extends AbstractComponent {
 	protected PublicationOutboundPort	portO;
 	protected ManagementOutboundPort	portm;
+	protected final String publishURI="handler-publish";
 
 	
-	protected Publisher(String uri, int nbThreads, int nbSchedulableThreads, String publicationoutboundPortURI,String managementoutboundPortURI) throws Exception {
-		super(uri, nbThreads, nbSchedulableThreads) ;
+	protected Publisher(String uri,String publicationobpUri,String managementobpUri) throws Exception {
+		super(uri, 0, 1) ;
+		
+		
 		// TODO Auto-generated constructor stub
-		this.portO =	new PublicationOutboundPort(publicationoutboundPortURI, this) ;
+		this.portO =	new PublicationOutboundPort(publicationobpUri, this) ;
 		// publish the port (an outbound port is always local)
-		this.portO.localPublishPort();
-		this.portm= new ManagementOutboundPort(managementoutboundPortURI,this);
-		this.portm.localPublishPort();
+		this.portO.publishPort();
+		this.portm= new ManagementOutboundPort(managementobpUri,this);
+		this.portm.publishPort();
+		
 		if (AbstractCVM.isDistributed) {
-			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
+			this.executionLog.setDirectory(System.getProperty("user.dir"));
 		} else {
-			this.executionLog.setDirectory(System.getProperty("user.home")) ;
+			this.executionLog.setDirectory(System.getProperty("user.home"));
 		}
-		this.tracer.setTitle("Publisher") ;
+		this.tracer.setTitle("Publisher");
 		this.tracer.setRelativePosition(1, 1) ;
+		this.portO.doConnection(uri, PublicationConnector.class.getCanonicalName());
+		this.portm.doConnection(uri, ManagementConnector.class.getCanonicalName());
+		System.out.println(publicationobpUri + "    " + PublicationConnector.class.getCanonicalName());
 	
+		//this.doPortConnection(uri , publicationobpUri, PublicationConnector.class.getCanonicalName());
+		//this.doPortConnection(uri, managementobpUri, ManagementConnector.class.getCanonicalName());
 	}
 	
+	public void execute() throws Exception{
+		this.createNewExecutorService(publishURI,2,true);
+		handleRequestAsync(publishURI,new AbstractComponent.AbstractService<Void>() {
+			@Override
+			public Void call() throws Exception {
+				((Publisher)this.getServiceOwner()).testpublish();
+				return null;
+			}
+		});
+	}
 	public void testConnection()
 	{
 		try {	
@@ -78,39 +99,9 @@ public class Publisher extends AbstractComponent {
 		System.out.println("pub Start ");
 		super.start() ;
 		this.logMessage("starting publisher component.") ;
-		
-		// Schedule the first service method invocation in one second.
-		/*
-		this.scheduleTask(
-			new AbstractComponent.AbstractTask() {
-				@Override
-				public void run() {
-					try {
-						testEnvoiMsg
-						System.out.println("end publisher");//((Publisher)this.getTaskOwner()).testConnection();
-					} catch (Exception e) {
-						throw new RuntimeException(e) ;
-					}
-				}
-			},
-			1000, TimeUnit.MILLISECONDS);
-		}
-		 */		
-		
-		this.scheduleTask(
-				new AbstractComponent.AbstractTask() {
-					@Override
-					public void run() {
-						try {
-							((Publisher)this.getTaskOwner()).testpublish();
-						} catch (Exception e) {
-							throw new RuntimeException(e) ;
-						}
-					}				},
-				1000, TimeUnit.MILLISECONDS);
-		System.out.println("Pub  Start End ");
+
 	}
-	
+	/*
 	@Override
 	public void			finalise() throws Exception
 	{
@@ -127,9 +118,9 @@ public class Publisher extends AbstractComponent {
 		// This called at the end to make the component internal
 		// state move to the finalised state.
 		super.finalise();
-	}
+	}*/
 	
-	
+	/*
 	@Override
 	public void			shutdown() throws ComponentShutdownException
 	{
@@ -155,6 +146,6 @@ public class Publisher extends AbstractComponent {
 		}
 		*/
 		
-	}
+	//}
 	
 }

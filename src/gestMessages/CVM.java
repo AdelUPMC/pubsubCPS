@@ -13,20 +13,20 @@ public class CVM extends AbstractCVM {
 	/** URI of the provider component (convenience)**/
 	protected static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
 	/** URI of the consumer component (convenience).						*/
-	protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
+	//protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
 	/** URI of the provider component (convenience)**/
-	protected static final String	SUBSCRIBER_COMPONENT_URI = "my-URI-subscriber" ;
+	//protected static final String	SUBSCRIBER_COMPONENT_URI = "my-URI-subscriber" ;
 	/** URI of the provider outbound port (simplifies the connection).	*/
-	protected static final String	PublicationOutboundPortURI = "publication-outboundport" ;
+	//protected static final String	PublicationOutboundPortURI = "publication-outboundport" ;
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	PublicationInboundPortURI = "publication-inboundport" ;
 	/** URI of the consumer inbound port (simplifies the connection).		*/
-	protected static final String	ReceptionOutboundPortURI = "reception-outboundport"; 
+	//protected static final String	ReceptionOutboundPortURI = "reception-outboundport"; 
 	/** URI of the consumer inbound port (simplifies the connection).		*/
-	protected static final String	ReceptionInboundPortURI = "reception-inboundport";
+	//protected static final String	ReceptionInboundPortURI = "reception-inboundport";
 
-	protected static final String	ManagementOutboundPortURIpub = "management-outboundportpub";
-	protected static final String	ManagementOutboundPortURIsub = "management-outboundportsub"; 
+	//protected static final String	ManagementOutboundPortURIpub = "management-outboundportpub";
+	//protected static final String	ManagementOutboundPortURIsub = "management-outboundportsub"; 
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	ManagementInboundPortURI = "management-inboundport";
 	public CVM() throws Exception {
@@ -36,6 +36,7 @@ public class CVM extends AbstractCVM {
 	protected String	publisherURI ;
 	protected String	subscriberURI ;
 	
+	
 	@Override
 	public void			deploy() throws Exception
 	{
@@ -43,7 +44,7 @@ public class CVM extends AbstractCVM {
 
 		this.brokerURI =
 			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
-					new Object[]{BROKER_COMPONENT_URI,1,1,PublicationInboundPortURI,ManagementInboundPortURI,ReceptionOutboundPortURI}) ;
+					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,ManagementInboundPortURI}) ;
 		assert	this.isDeployedComponent(this.brokerURI) ;
 		this.toggleTracing(this.brokerURI) ;
 		this.toggleLogging(this.brokerURI) ;
@@ -51,7 +52,8 @@ public class CVM extends AbstractCVM {
 		System.out.println("broker cree");
 		
 		// create the publisher component
-		this.publisherURI =
+		this.publisherURI =ComponentFactory.createPublisher(PublicationInboundPortURI, ManagementInboundPortURI);
+		/*this.publisherURI =
 			AbstractComponent.createComponent(
 					Publisher.class.getCanonicalName(),
 					new Object[]{PUBLISHER_COMPONENT_URI,1,1,PublicationOutboundPortURI,ManagementOutboundPortURIpub}) ;
@@ -64,21 +66,23 @@ public class CVM extends AbstractCVM {
 		this.subscriberURI =
 				AbstractComponent.createComponent(
 						Subscriber.class.getCanonicalName(),
-						new Object[]{SUBSCRIBER_COMPONENT_URI,1,1,ReceptionInboundPortURI,ManagementOutboundPortURIsub});	
+						new Object[]{SUBSCRIBER_COMPONENT_URI,ReceptionInboundPortURI,ManagementOutboundPortURIsub});	
 			assert	this.isDeployedComponent(this.subscriberURI) ;
 
 			this.toggleTracing(this.subscriberURI) ;
 			this.toggleLogging(this.subscriberURI) ;
 			System.out.println("subscriber cree");
+			*/
 
-			
+		this.subscriberURI =ComponentFactory.createSubscriber(ManagementInboundPortURI);
+	
 				
 		// --------------------------------------------------------------------
 		// Connection phase
 		// --------------------------------------------------------------------
 		
 		//connection de l'outboundport du publisher vers l'inbound du broker
-		this.doPortConnection(
+		/*this.doPortConnection(
 				this.publisherURI,
 				PublicationOutboundPortURI,
 				PublicationInboundPortURI,
@@ -103,15 +107,15 @@ public class CVM extends AbstractCVM {
 				ManagementOutboundPortURIsub,
 				ManagementInboundPortURI,
 				ManagementConnector.class.getCanonicalName()) ;
-		
+		*/
 		super.deploy();
 		assert	this.deploymentDone() ;
-	}
+		}
 
 	/**
 	 * @see fr.sorbonne_u.components.cvm.AbstractCVM#finalise()
 	 */
-	
+	/*
 	@Override
 	public void				finalise() throws Exception
 	{
@@ -135,6 +139,7 @@ public class CVM extends AbstractCVM {
 		
 	//	super.finalise();
 	}
+	*/
 
 	/**
 	 * disconnect the components and then call the base shutdown method.
@@ -151,10 +156,10 @@ public class CVM extends AbstractCVM {
 	@Override
 	public void				shutdown() throws Exception
 	{
-		//assert	this.allFinalised() ;
+		assert	this.allFinalised() ;
 		// any disconnection not done yet can be performed here
 
-		//super.shutdown();
+		super.shutdown();
 	}
 
 	public static void		main(String[] args)

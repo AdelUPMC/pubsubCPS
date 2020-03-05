@@ -1,11 +1,13 @@
 package gestMessages.components;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.annotations.OfferedInterfaces;
 import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
+import fr.sorbonne_u.components.examples.pipeline.connectors.ManagementConnector;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.InvariantException;
@@ -19,26 +21,31 @@ import messages.MessageI;
 @OfferedInterfaces(offered = {ReceptionCI.class})
 public class Subscriber extends AbstractComponent {
 
-	protected String		uriPrefix ;
+	protected String		uriPrefix;
 	protected ManagementOutboundPort	portm;
-	protected Subscriber(int nbThreads, int nbSchedulableThreads) {
-		super(nbThreads, nbSchedulableThreads);
-		// TODO Auto-generated constructor stub
-	}
-	
-	protected Subscriber(String uri,int nbThreads, int nbSchedulableThreads,String receptionInboundPortURI,String managementoutboundPortURI)
+	private ArrayList<MessageI> myMessages;
+
+
+	protected Subscriber(String uri,String receptionInboundPortURI,String managementOutboundPortURI)
 			throws Exception{
-		super(uri, nbThreads, nbSchedulableThreads);
+		super(uri, 0, 1) ;
 		// TODO Auto-generated constructor stub
 		assert	uri != null :
-			new PreconditionException("uri can't be null!") ;
-		uriPrefix=uri;
-		System.out.println(receptionInboundPortURI);
-		ReceptionInboundPort p = new ReceptionInboundPort(receptionInboundPortURI, this) ;
-		p.localPublishPort(); ;
+			new PreconditionException("uri can't be null!");
+		assert	receptionInboundPortURI != null :
+			new PreconditionException("error receptionInboundPortURI null");
 		
-		this.portm= new ManagementOutboundPort(managementoutboundPortURI,this);
-		this.portm.localPublishPort();
+		assert	managementOutboundPortURI != null :
+			new PreconditionException("error managementoutboundPortURI null") ;
+		
+		uriPrefix=uri;
+		//System.out.println(receptionInboundPortURI);
+		ReceptionInboundPort p = new ReceptionInboundPort(receptionInboundPortURI, this) ;
+		p.localPublishPort();
+		
+		
+		this.portm= new ManagementOutboundPort(managementOutboundPortURI,this);
+		this.portm.publishPort();
 		//System.out.println("constructeur Subscriber");
 		// publish the port
 		
@@ -49,6 +56,8 @@ public class Subscriber extends AbstractComponent {
 		}
 		this.tracer.setTitle("Subscriber") ;
 		this.tracer.setRelativePosition(1, 1) ;
+		portm.doConnection(uri, ManagementConnector.class.getCanonicalName());
+		//this.doPortConnection(uri, managementOutboundPortURI, ManagementConnector.class.getCanonicalName());
 	}
 	
 	public void acceptMessage(MessageI m) throws Exception {
@@ -109,7 +118,7 @@ public class Subscriber extends AbstractComponent {
 	}
 	
 	
-	
+	/*
 	@Override
 	public void			shutdown() throws ComponentShutdownException
 	{
@@ -125,15 +134,8 @@ public class Subscriber extends AbstractComponent {
 		
 
 		
-	/*	try {
-			PortI[] p = this.findPortsFromInterface(ReceptionCI.class) ;
-			p[0].unpublishPort() ;
-		} catch (Exception e) {
-			throw new ComponentShutdownException(e);
-		}
 	
-		*/
-	}
+	}*/
 	
 	protected static void	checkInvariant(Subscriber s)
 	{

@@ -14,6 +14,7 @@ import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.PostconditionException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
+import gestMessages.connectors.ManagementConnector;
 import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.PublicationCI;
 import gestMessages.interfaces.ReceptionCI;
@@ -26,73 +27,48 @@ import messages.MessageI;
 
 @RequiredInterfaces(required = {ReceptionCI.class})
 @OfferedInterfaces(offered = {PublicationCI.class,ManagementCI.class})
-public class Broker extends AbstractComponent implements ManagementCI,PublicationCI {
+public class Broker extends AbstractComponent implements ManagementCI,PublicationCI{
 
 	/**
 	 * <String,ArrayList<MessageI>> messages: 
 	 * 	-String: topic
-	 * 	-ArrayList<MessageI>: liste des MessageI associés
+	 * 	-ArrayList<MessageI>: liste des MessageI associes
 	 * 
 	 * Map<String,ArrayList<String>> abonnement: 
 	 * 	-String: topic
-	 * 	-ArrayList<String>: liste des uris des abonnés au topic
+	 * 	-ArrayList<String>: liste des uris des abonnes au topic
 	 *
 	 * Map<String,MessageFilterI> filters: 
 	 * 	-String: inbound port uri
-	 * 	-MessageFilterI: MessageFilterI associé	
+	 * 	-MessageFilterI: MessageFilterI associe	
 	 * 
-	 * Map<String,ReceptionOutboundPort> subsport: 
+	 * Map<String,ReceptionOutboundPort> subsobp: 
 	 * 	-String: uri du subscriber
-	 * 	-ReceptionOutboundPort: outboundport du subscriber pour la réception				
+	 * 	-ReceptionOutboundPort: outboundport  du subscriber pour la reception	
+	 * 
+	 * Map<ReceptionOutboundPort,ArrayList<MessageI>> published: 
+	 * 	-ReceptionOutboundPort: ReceptionOutboundPort du subscriber
+	 * 	-MessageI: message qui doit a Ã©tÃ© publiÃ© et qui doit Ãªtre transmit au subscriber			
 	 * 
 			
 	 */
 	protected String uriPrefix;
 	//protected String managementInboundPortURI;
-	protected final String acceptExecutor="handler-accept";
+	protected final String acceptURI="handler-accept";
 	
 	private Map<String,ArrayList<MessageI>> messages;
 	private Map<String,ArrayList<String>> abonnement;
 	private Map<String, MessageFilterI> filters;
 	private Map<String,ReceptionOutboundPort> subsobp;
-	protected ReceptionOutboundPort rop;
+	private Map<ReceptionOutboundPort,ArrayList<MessageI>> published;
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
 	
 	
 	protected Broker(int nbThreads, int nbSchedulableThreads) {
 		super(nbThreads, nbSchedulableThreads);
 	}
-	/*
-	protected Broker(String uri,int nbThreads, int nbSchedulableThreads,String PublicationInboundPortURI,String ManagementInboundPortURI,String ReceptionOutboundPortUri)
-			throws Exception{
-		super(uri, nbThreads, nbSchedulableThreads);
-		System.out.println("constructeur broker");
-		
-		// Outbound port pour ReceptionCI
-		this.rop= new ReceptionOutboundPort(ReceptionOutboundPortUri,this);
-		this.rop.localPublishPort();
-		
-		//Inbound port pour PublicationCI
-		PublicationInboundPort p = new PublicationInboundPort(PublicationInboundPortURI, this) ;
-		p.localPublishPort();
-		ManagementInboundPort pm= new ManagementInboundPort(ManagementInboundPortURI,this);
-		pm.localPublishPort();
-		
-		uriPrefix=uri;
-
-		
-		if (AbstractCVM.isDistributed) {
-			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
-		} else {
-			this.executionLog.setDirectory(System.getProperty("user.home")) ;
-		}
-		testConstructeur();
-		//ajout seance TME4
-		messages= new HashMap<>();
-		abonnement= new HashMap<>();
-		topics= new ArrayList<>();
-
-	}*/
+	
 	protected Broker(String uri,String PublicationInboundPortURI,String ManagementInboundPortURI)throws Exception {
 		
 		super(uri, 0, 1) ;
@@ -107,6 +83,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		this.abonnement= new HashMap<>();
 		this.filters=new HashMap<>();
 		this.subsobp= new HashMap<>();
+		this.published= new HashMap<>();
 		
 		//Inbound port pour PublicationCI
 		PublicationInboundPort pip = new PublicationInboundPort(PublicationInboundPortURI, this) ;
@@ -148,35 +125,46 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	public void	start() throws ComponentStartException{
 
 	}
+	
 	@Override
 	public void execute() throws Exception{
-		this.createNewExecutorService(acceptExecutor,2,true);
-		handleRequestAsync(acceptExecutor,new AbstractComponent.AbstractService<Void>() {
+		this.createNewExecutorService(acceptURI,2,true);
+		handleRequestAsync(acceptURI,new AbstractComponent.AbstractService<Void>() {
 			@Override
 			public Void call() throws Exception {
-				((Broker)this.getServiceOwner()).routineBroker();
+				((Broker)this.getServiceOwner()).observerPublished();
 				return null;
 			}
 		});
 	}
 	
-	private void sendMessages(String topic) throws Exception
-	{
-		ArrayList<MessageI> lm;
-		ArrayList<String> subsribers;
-		if(messages.containsKey(topic)) {
-			lm = messages.get(topic);
-			if (!abonnement.containsKey(topic) ||abonnement.get(topic).isEmpty() )
-			{
-				System.out.println("personne d'abonner");
-				return;
+	public void sendpublished(MessageI m,String topic) {
+		ArrayList<String> uris=abonnement.get(topic);
+		for(String abonne_uri: uris) {
+			ReceptionOutboundPort ri=subsobp.get(abonne_uri);
+			if(!published.containsKey(ri)) {
+				ArrayList<MessageI> pubmessages= new ArrayList<>();
+				pubmessages.add(m);
+				published.put(ri, pubmessages);
 			}
-			subsribers = abonnement.get(topic);
-			for (String   subscriber: subsribers) {
-				while (!lm.isEmpty())
-				{
-					rop.acceptMessage(lm.get(0));
-					lm.remove(0);
+			else {
+				ArrayList<MessageI> pubmessages= published.get(ri);
+				pubmessages.add(m);
+				published.put(ri, pubmessages);
+			}
+		}
+	}
+	public void observerPublished() throws Exception {
+		while(true) {
+			Thread.sleep(150L);
+			if (!published.isEmpty()) {
+				for(ReceptionOutboundPort rop: published.keySet()) {
+					ArrayList<MessageI> l = published.get(rop);
+					for(MessageI m: l) {
+						rop.acceptMessage(m);
+						l.remove(m);
+					}
+					//published.remove(rop);
 				}
 			}
 		}
@@ -184,17 +172,26 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	/*PublicationCI*/
 	public void publish(MessageI m, String topic)throws Exception {
 		ArrayList<MessageI> lm;
-		if(!messages.containsKey(topic)) {
-			lm=new ArrayList<MessageI>();
-			lm.add(m);
-			messages.put(topic,lm);
-		}else
-		{
-			lm = messages.get(topic);
-			lm.add(m);
+		lock.writeLock().lock();
+		try {
+			if(!messages.containsKey(topic)) 
+				createTopic(topic);
+	/*//			lm=new ArrayList<MessageI>();
+		//		lm.add(m);
+			//	messages.put(topic,lm);
+			}else
+			{
+		*/		lm = messages.get(topic);
+				lm.add(m);
+			
+			//System.out.println("Broker topic =  " + topic);
+		}finally {
+			sendpublished(m,topic);
+			lock.writeLock().unlock();
 		}
-		System.out.println("Broker topic =  " + topic);
-		sendMessages(topic);
+			//sendMessages(topic);}// Ã  dÃ©battre s'il faut le faire en exclusion mutuelle ou non
+		
+		
 		
 	}
 	
@@ -207,8 +204,8 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	/*ManagementCI*/
 	public void createTopic(String topic) throws Exception{
-		
-		if(this.abonnement.get(topic)==null) {
+
+		if(!this.abonnement.containsKey(topic)) {
 			this.abonnement.put(topic, new ArrayList<String>());
 			System.out.println("Broker created topic :" + topic);
 		}
@@ -231,6 +228,23 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	//TODO SubscriptionImplementation 
 	public void subscribe(String topic, String inboundPortUri) throws Exception{
+		ArrayList<String> subsriber;
+		
+		if(!subsobp.containsKey(inboundPortUri)) {
+			subsobp.put(inboundPortUri, new ReceptionOutboundPort(inboundPortUri,this));
+			this.doPortConnection(uriPrefix, inboundPortUri,ManagementConnector.class.getCanonicalName());
+		}
+		if(!abonnement.containsKey(topic))
+		{
+			System.out.println("Ce topic n'existe pas !!!!!!!!!!!!");
+			return ;
+		}
+	
+		subsriber = abonnement.get(topic);		
+		if (subsriber.contains(inboundPortUri))
+			System.out.println("Vous etes deja abonnÃ©");
+		else
+			subsriber.add(inboundPortUri);
 		
 	}
 	public void subscribe(String[] topics, String inboundPortUri)throws Exception{
@@ -248,55 +262,15 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	public String[] getTopics()throws Exception{
 		return null;
 	}
+	@Override
+	public void				finalise() throws Exception
+	{
+		
+		for (String uriReception: subsobp.keySet()) {
+			this.doPortDisconnection(uriReception);			
+		}
+	}
 	
-	public void routineBroker() throws Exception {
-        HashMap<String,Set<MessageI>> sended;
-        boolean abonne=false;
-        while(true){
-            lock.readLock().lock();
-            try{
-                sended= new HashMap<>();
-                String topic;
-                for(Map.Entry<String, ArrayList<MessageI>> entry : messages.entrySet()){
-                    topic = entry.getKey();
-                    if(!abonnement.containsKey(topic)){
-                        abonne=false;
-                        break;
-                    }else {
-                        abonne=true;
-                    }
-                    if(!sended.containsKey(topic)) sended.put(topic,new HashSet<>());
-                    for(MessageI msg : entry.getValue()){
-                        //Thread.sleep(50);
-                        for(String uriSub : abonnement.get(topic)){
-                            MessageFilterI filter ;
-                            if((filter=filters.get(uriSub))!=null){
-                                if(filter.filter(msg)){
-                                    subsobp.get(uriSub).acceptMessage(msg);
-                                }
-                            }else{
-                                subsobp.get(uriSub).acceptMessage(msg);
-                            }
-                            sended.get(topic).add(msg);
-                        }
-                    }
-                }
-            }finally {
-                lock.readLock().unlock();
-            }
-            if(!abonne)continue;
-            lock.writeLock().lock();
-            try{
-                for(Map.Entry<String, Set<MessageI>> entry : sended.entrySet()){
-                    messages.get(entry.getKey()).removeAll(entry.getValue());
-                }
-            } finally {
-                lock.writeLock().unlock();
-            }
-        }
-}
-	
-
 	/*
 	public void testAccept()
 	{
@@ -312,6 +286,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			e.printStackTrace();
 		}
 		*/
+
 		
 		
 }
