@@ -28,7 +28,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void subscribe(String topic, String inboundPortUri) throws Exception {
-		//((Broker)this.getOwner()).subscribe(topic,inboundPortUri);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -42,7 +41,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void subscribe(String[] topics, String inboundPortUri) throws Exception{
-		//((Broker)this.getOwner()).subscribe(topics,inboundPortUri);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -56,7 +54,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void subscribe(String topic, MessageFilterI filter, String inboundPortUri) throws Exception{
-		//((Broker)this.getOwner()).subscribe(topic,filter, inboundPortUri);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -71,7 +68,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortUri) throws Exception{
-		//((Broker)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -85,7 +81,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void unsubscribe(String topic, String inboundPortUri) throws Exception{
-		//((Broker)this.getOwner()).unsubscribe(topic, inboundPortUri);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -100,7 +95,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void createTopic(String topic) throws Exception{
-		//((Broker)this.getOwner()).createTopic(topic);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -115,7 +109,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void createTopics(String[] topics) throws Exception {
-		//((Broker)this.getOwner()).createTopics(topics);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -130,7 +123,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public void destroyTopic(String topic) throws Exception {
-		//((Broker)this.getOwner()).destroyTopic(topic);
 		this.owner.handleRequestAsync(
 				new AbstractComponent.AbstractService<Void>() {
 					@Override
@@ -145,7 +137,6 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public boolean isTopic(String topic) throws Exception {
-		//return ((Broker)this.getOwner()).isTopic(topic);
 		return this.owner.handleRequestSync(
 				new AbstractComponent.AbstractService<Boolean>(){
 					@Override
@@ -157,12 +148,23 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 
 	@Override
 	public String[] getTopics() throws Exception {
-		//return ((Broker)this.getOwner()).getTopics();
 		return this.owner.handleRequestSync(
 				new AbstractComponent.AbstractService<String[]>() {
 					@Override
 					public String[] call() throws Exception {
 						return ((Broker)this.getServiceOwner()).getTopics();
+						
+					}
+				});
+	}
+
+	@Override
+	public String getPublicationPortURI() throws Exception {
+		return this.owner.handleRequestSync(
+				new AbstractComponent.AbstractService<String>() {
+					@Override
+					public String call() throws Exception {
+						return ((Broker)this.getServiceOwner()).getPublicationPortURI();
 						
 					}
 				});

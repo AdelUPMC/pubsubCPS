@@ -78,5 +78,9 @@ public class ManagementOutboundPort extends AbstractOutboundPort implements Mana
 	public String[] getTopics() throws Exception {
 		return ((ManagementCI)this.connector).getTopics();
 	}
+	@Override
+	public String getPublicationPortURI() throws Exception {
+		return ((ManagementCI)this.connector).getPublicationPortURI();
+	}
 
 }

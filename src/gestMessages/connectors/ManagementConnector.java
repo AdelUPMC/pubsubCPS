@@ -63,4 +63,9 @@ public class ManagementConnector extends AbstractConnector implements Management
 		return((ManagementCI)this.offering).getTopics();
 	}
 
+	@Override
+	public String getPublicationPortURI() throws Exception {
+		return((ManagementCI)this.offering).getPublicationPortURI();
+	}
+
 }

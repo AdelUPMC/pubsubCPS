@@ -2,6 +2,7 @@ package gestMessages;
 
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
+import fr.sorbonne_u.components.helpers.CVMDebugModes;
 import gestMessages.components.Broker;
 import gestMessages.components.Publisher;
 import gestMessages.components.Subscriber;
@@ -11,7 +12,7 @@ import gestMessages.connectors.ReceptionConnector;
 
 public class CVM extends AbstractCVM {
 	/** URI of the provider component (convenience)**/
-	protected static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
+	public static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
 	/** URI of the consumer component (convenience).						*/
 	//protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
 	/** URI of the provider component (convenience)**/
@@ -41,7 +42,10 @@ public class CVM extends AbstractCVM {
 	public void			deploy() throws Exception
 	{
 		assert	!this.deploymentDone() ;
-
+		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.PUBLIHSING) ;
+		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.CONNECTING) ;
+		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.COMPONENT_DEPLOYMENT) ;
+		/**broker component**/
 		this.brokerURI =
 			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
 					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,ManagementInboundPortURI}) ;

@@ -156,7 +156,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	public void observerPublished() throws Exception {
 		while(true) {
-			Thread.sleep(150L);
+			//Thread.sleep(150L);
 			if (!published.isEmpty()) {
 				for(ReceptionOutboundPort rop: published.keySet()) {
 					ArrayList<MessageI> l = published.get(rop);
@@ -270,7 +270,13 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			this.doPortDisconnection(uriReception);			
 		}
 	}
-	
+
+	@Override
+	public String getPublicationPortURI() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/*
 	public void testAccept()
 	{

@@ -11,7 +11,7 @@ public class ComponentFactory {
 	
 	protected static String createSubscriber(String managementOBPURI) throws Exception
 	{
-		String uri = "SUBSRIBERURI" + numberSubsribers;
+		String uri = "SUBSCRIBERURI-" + numberSubsribers;
 		String receptionIBPuri = "SUBRECEPTIONIBPURI" + numberSubsribers;
 		
 		numberSubsribers++;
@@ -23,7 +23,7 @@ public class ComponentFactory {
 
 	protected  static String createPublisher(String publicationoutboundPortURI, String managementoutboundPortURI) throws Exception
 	{
-		String uri = "PUBLISHERURI" + numberPublishers;
+		String uri = "PUBLISHERURI-" + numberPublishers;
 		
 		numberPublishers++;
 		return 
