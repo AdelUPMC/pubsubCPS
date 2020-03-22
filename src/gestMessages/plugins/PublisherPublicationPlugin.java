@@ -25,7 +25,7 @@ public class PublisherPublicationPlugin extends AbstractPlugin {
 	{
 		super.installOn(owner);
 		this.addRequiredInterface(PublicationCI.class);
-		this.pobp = new PublicationOutboundPort(this.owner);
+		this.pobp = new PublicationOutboundPort(this.getPluginURI(), this.owner);
 		this.pobp.publishPort();
 	}
 	

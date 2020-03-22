@@ -14,8 +14,8 @@ public class SubscriberReceptionPlugin extends AbstractPlugin implements Recepti
 	 */
 	private static final long serialVersionUID = 1L;
 
-	protected ReceptionInboundPortForPlugin ribp;
-	protected String receptionInboundPortURI;
+	public ReceptionInboundPortForPlugin ribp;
+	public String receptionInboundPortURI;
     protected String pluginURI;
 
 

@@ -19,21 +19,21 @@ import messages.MessageI;
 
 @RequiredInterfaces(required = {PublicationCI.class,ManagementCI.class})
 public class Publisher extends AbstractComponent {
-	protected PublicationOutboundPort	portO;
-	protected ManagementOutboundPort	portm;
+	protected PublicationOutboundPort	publicationObp;
+	protected ManagementOutboundPort	managementObp;
 	protected final String publishURI="handler-publish";
 
 	
-	protected Publisher(String uri,String publicationobpUri,String managementobpUri) throws Exception {
+	protected Publisher(String uri,String publicationObpURI,String managementObpURI) throws Exception {
 		super(uri, 0, 1) ;
 		
 		
 		// TODO Auto-generated constructor stub
-		this.portO =	new PublicationOutboundPort(publicationobpUri, this) ;
+		this.publicationObp =	new PublicationOutboundPort(publicationObpURI, this) ;
 		// publish the port (an outbound port is always local)
-		this.portO.publishPort();
-		this.portm= new ManagementOutboundPort(managementobpUri,this);
-		this.portm.publishPort();
+		this.publicationObp.publishPort();
+		this.managementObp= new ManagementOutboundPort(managementObpURI,this);
+		this.managementObp.publishPort();
 		
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir"));
@@ -42,12 +42,12 @@ public class Publisher extends AbstractComponent {
 		}
 		this.tracer.setTitle("Publisher");
 		this.tracer.setRelativePosition(1, 1) ;
-		this.portO.doConnection(uri, PublicationConnector.class.getCanonicalName());
-		this.portm.doConnection(uri, ManagementConnector.class.getCanonicalName());
-		System.out.println(publicationobpUri + "    " + PublicationConnector.class.getCanonicalName());
+		this.publicationObp.doConnection(uri, PublicationConnector.class.getCanonicalName());
+		this.managementObp.doConnection(uri, ManagementConnector.class.getCanonicalName());
+		System.out.println(publicationObpURI + "    " + PublicationConnector.class.getCanonicalName());
 	
-		//this.doPortConnection(uri , publicationobpUri, PublicationConnector.class.getCanonicalName());
-		//this.doPortConnection(uri, managementobpUri, ManagementConnector.class.getCanonicalName());
+		//this.doPortConnection(uri , publicationObpURI, PublicationConnector.class.getCanonicalName());
+		//this.doPortConnection(uri, managementObpURI, ManagementConnector.class.getCanonicalName());
 	}
 	
 	public void execute() throws Exception{
@@ -63,7 +63,7 @@ public class Publisher extends AbstractComponent {
 	public void testConnection()
 	{
 		try {	
-			this.portO.publish((MessageI)null, "Toute mes felicitations");
+			this.publicationObp.publish((MessageI)null, "Toute mes felicitations");
 			this.logMessage("publisher published a new message ") ;
 		} catch (Exception e) {
 			//System.out.println("Presque !!");
@@ -75,7 +75,7 @@ public class Publisher extends AbstractComponent {
 	public void testManagement()
 	{
 		try {	
-			this.portm.createTopic("CPS publisher");
+			this.managementObp.createTopic("CPS publisher");
 			this.logMessage("Topic created by a publisher");
 		} catch (Exception e) {
 			//System.out.println("Presque !!");
@@ -86,7 +86,7 @@ public class Publisher extends AbstractComponent {
 	public void testpublish()
 	{
 		try {
-			this.portO.publish(new Message(null,null,null,"je tente la publication"), "UPMC");
+			this.publicationObp.publish(new Message(null,null,null,"je tente la publication"), "UPMC");
 			this.logMessage("publisher published a new message ") ;
 		} catch (Exception e) {
 			//System.out.println("Presque !!");
@@ -113,8 +113,8 @@ public class Publisher extends AbstractComponent {
 		// In static architectures like in this example, ports can also
 		// be disconnected by the finalise method of the component
 		// virtual machine.
-		this.portO.doDisconnection();
-		this.portm.doDisconnection();
+		this.publicationObp.doDisconnection();
+		this.managementObp.doDisconnection();
 		// This called at the end to make the component internal
 		// state move to the finalised state.
 		super.finalise();
@@ -127,10 +127,10 @@ public class Publisher extends AbstractComponent {
 		System.out.println("Shutdown Pub");
 		
 		try {
-			this.portO.unpublishPort();
-			this.portO.destroyPort();
-			this.portm.unpublishPort();
-			this.portm.destroyPort();
+			this.publicationObp.unpublishPort();
+			this.publicationObp.destroyPort();
+			this.managementObp.unpublishPort();
+			this.managementObp.destroyPort();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
