@@ -1,151 +1,159 @@
 package gestMessages.components;
 
-import java.util.concurrent.TimeUnit;
 
 import fr.sorbonne_u.components.AbstractComponent;
-import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
-import fr.sorbonne_u.components.examples.pipeline.connectors.ManagementConnector;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
-import gestMessages.connectors.PublicationConnector;
-import gestMessages.interfaces.ManagementCI;
-import gestMessages.interfaces.PublicationCI;
-import gestMessages.ports.ManagementOutboundPort;
-import gestMessages.ports.PublicationOutboundPort;
+import gestMessages.plugins.PubSubManagementPlugin;
+import gestMessages.plugins.PublisherPublicationPlugin;
 import messages.Message;
+import messages.MessageFilterI;
 import messages.MessageI;
 
 
-@RequiredInterfaces(required = {PublicationCI.class,ManagementCI.class})
+
 public class Publisher extends AbstractComponent {
+	protected String PUBLISHER_PUBLICATION_PLUGIN_URI = "publication_clientSide_PluginURI-" ;
+    protected String PUBLISHER_MANAGEMENT_PLUGIN_URI = "management_clientSide_PluginURI-" ;
+    private PubSubManagementPlugin managementPlugin;
+    private PublisherPublicationPlugin publicationPlugin;
+    private static int nbpublishers = 0;
+    /*
 	protected PublicationOutboundPort	publicationObp;
 	protected ManagementOutboundPort	managementObp;
 	protected final String publishURI="handler-publish";
-
-	
-	protected Publisher(String uri,String publicationObpURI,String managementObpURI) throws Exception {
-		super(uri, 0, 1) ;
-		
-		
-		// TODO Auto-generated constructor stub
-		this.publicationObp =	new PublicationOutboundPort(publicationObpURI, this) ;
-		// publish the port (an outbound port is always local)
-		this.publicationObp.publishPort();
-		this.managementObp= new ManagementOutboundPort(managementObpURI,this);
-		this.managementObp.publishPort();
+*/
+    protected Publisher() throws Exception {
+    	//1 thread, 0 schedulable thread
+        this(1, 0);
+    }
+    
+	protected Publisher(int nbThreads,int nbSchedulableThreads) throws Exception {
+		//1 thread, 0 schedulable thread
+		super(1, 0) ;
+		synchronized(this) {
+			nbpublishers++;
+			this.PUBLISHER_PUBLICATION_PLUGIN_URI = this.PUBLISHER_PUBLICATION_PLUGIN_URI + nbpublishers;
+	        this.PUBLISHER_MANAGEMENT_PLUGIN_URI = this.PUBLISHER_MANAGEMENT_PLUGIN_URI + nbpublishers;
+		}
 		
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir"));
 		} else {
 			this.executionLog.setDirectory(System.getProperty("user.home"));
 		}
-		this.tracer.setTitle("Publisher");
-		this.tracer.setRelativePosition(1, 1) ;
-		this.publicationObp.doConnection(uri, PublicationConnector.class.getCanonicalName());
-		this.managementObp.doConnection(uri, ManagementConnector.class.getCanonicalName());
-		System.out.println(publicationObpURI + "    " + PublicationConnector.class.getCanonicalName());
-	
-		//this.doPortConnection(uri , publicationObpURI, PublicationConnector.class.getCanonicalName());
-		//this.doPortConnection(uri, managementObpURI, ManagementConnector.class.getCanonicalName());
+		this.tracer.setTitle("Publisher"+nbpublishers);
+		this.tracer.setRelativePosition(nbpublishers, 1) ;
 	}
-	
-	public void execute() throws Exception{
-		this.createNewExecutorService(publishURI,2,true);
-		handleRequestAsync(publishURI,new AbstractComponent.AbstractService<Void>() {
-			@Override
-			public Void call() throws Exception {
-				((Publisher)this.getServiceOwner()).testpublish();
-				return null;
-			}
-		});
-	}
-	public void testConnection()
-	{
-		try {	
-			this.publicationObp.publish((MessageI)null, "Toute mes felicitations");
-			this.logMessage("publisher published a new message ") ;
-		} catch (Exception e) {
-			//System.out.println("Presque !!");
-			e.printStackTrace();
-				}
-		
-	}
-	
-	public void testManagement()
-	{
-		try {	
-			this.managementObp.createTopic("CPS publisher");
-			this.logMessage("Topic created by a publisher");
-		} catch (Exception e) {
-			//System.out.println("Presque !!");
-			e.printStackTrace();
-				}
-		
-	}
-	public void testpublish()
-	{
-		try {
-			this.publicationObp.publish(new Message(null,null,null,"je tente la publication"), "UPMC");
-			this.logMessage("publisher published a new message ") ;
-		} catch (Exception e) {
-			//System.out.println("Presque !!");
-			e.printStackTrace();
-				}
-		
-	}
+
 	public void			start() throws ComponentStartException
 	{
-		System.out.println("pub Start ");
 		super.start() ;
-		this.logMessage("starting publisher component.") ;
+		this.logMessage("starting component publisher "+Publisher.nbpublishers);
 
 	}
-	/*
-	@Override
-	public void			finalise() throws Exception
-	{
-		this.logMessage("stopping publisher component.") ;
-		this.printExecutionLogOnFile("publisher");
-		// This is the place where to clean up resources, such as
-		// disconnecting and unpublishing ports that will be destroyed
-		// when shutting down.
-		// In static architectures like in this example, ports can also
-		// be disconnected by the finalise method of the component
-		// virtual machine.
-		this.publicationObp.doDisconnection();
-		this.managementObp.doDisconnection();
-		// This called at the end to make the component internal
-		// state move to the finalised state.
-		super.finalise();
-	}*/
+	public void execute() throws Exception{
+		//create plugings
+		this.publicationPlugin=new PublisherPublicationPlugin() ;
+		this.managementPlugin=new PubSubManagementPlugin();
+		
+		//install them
+		publicationPlugin.setPluginURI(this.PUBLISHER_PUBLICATION_PLUGIN_URI);
+		managementPlugin.setPluginURI(this.PUBLISHER_MANAGEMENT_PLUGIN_URI);
+		this.installPlugin(publicationPlugin);
+		this.installPlugin(managementPlugin);
+		
+		/**Scenario de test:
+		 * on va tester les 4 méthodes publish de PUBLICATIONCI
+		 * **/
+		 Thread.sleep(150);
+		 publish(new Message("Hello world from C++"),"C++");
+		 publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
+		 publish(new Message[] {new Message("Hello world from C"),new Message("Hello world from Rust")},"Imperative programming");
+		 publish(new Message[] {new Message("Hello world from OCaml"),new Message("Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
+		
+	}
 	
-	/*
 	@Override
-	public void			shutdown() throws ComponentShutdownException
-	{
-		System.out.println("Shutdown Pub");
-		
-		try {
-			this.publicationObp.unpublishPort();
-			this.publicationObp.destroyPort();
-			this.managementObp.unpublishPort();
-			this.managementObp.destroyPort();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		super.shutdown();
-		/*
-		try {
-			PortI[] p = this.findPortsFromInterface(ReceptionCI.class) ;
-			p[0].unpublishPort() ;
-		} catch (Exception e) {
-			throw new ComponentShutdownException(e);
-		}
-		*/
-		
-	//}
+	 public void			finalise() throws Exception{
+	        this.logMessage("finalising component publisher "+Publisher.nbpublishers) ;
+	        super.finalise();
+	 }
+	@Override
+	 public void			shutdown()  throws ComponentShutdownException{
+	        this.logMessage("shutdown : component publisher "+Publisher.nbpublishers) ;
+	        super.shutdown();
+	 }
+	
+	@Override
+	 public void			shutdownNow()  throws ComponentShutdownException{
+	        this.logMessage("shutdownNow : component publisher "+Publisher.nbpublishers) ;
+	        super.shutdownNow();
+	 }
+	 
+	//PublicationCI
+	 public void publish(MessageI m, String topic) throws Exception {
+		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing message:"+m.getURI()+ "| topic="+ topic);
+		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(m,topic);
+	  }
+	 
+	 public void publish(MessageI m, String[] topics) throws Exception {
+		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing message:"+m.getURI()+ "| topics="+ topics.toString());
+		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(m,topics);
+	  }
+	 
+	 public void publish(MessageI[] ms, String topic) throws Exception {
+		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing messages:"+ms.toString()+ "| topic="+topic);
+		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(ms,topic);
+	 }
+	 
+	 public void publish(MessageI[] ms, String[] topics) throws Exception {
+		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing messages:"+ms.toString()+ "| topics="+ topics.toString());
+		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(ms,topics);
+	 }
+	 
+	 
+	 //ManagementCI
+	 public void subscribe(String topic, String inboundPortURI)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, inboundPortURI);
+	  }
+
+	 public void subscribe(String[] topics, String inboundPortURI)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).subscribe(topics, inboundPortURI);
+	 }
+	 public void subscribe(String topic, MessageFilterI filter, String inboundPortURI) throws Exception{
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).subscribe(topic,filter, inboundPortURI);
+	  }
+	 public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortURI) throws Exception{
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, newFilter, inboundPortURI);
+	  }
+	 public void unsubscribe(String topic, String inboundPortUri) throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).unsubscribe(topic, inboundPortUri);
+	    }
+	 public void createTopic(String topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).createTopic(topic);
+	  }
+	 public void createTopics(String[] topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).createTopics(topic);
+	  }
+	 
+	 public void destroyTopic(String topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).destroyTopic(topic);
+	  }
+	 public boolean isTopic(String topic) throws Exception{
+	        return  ((PubSubManagementPlugin)this.getPlugin(PUBLISHER_MANAGEMENT_PLUGIN_URI)).isTopic(topic);
+	  }
+	 
+	 public String[] getTopics() throws Exception{
+	        return ((PubSubManagementPlugin)this.getPlugin(this.PUBLISHER_MANAGEMENT_PLUGIN_URI)).getTopics();
+	  }
+	 
+	 public String getPublicationPortURI() throws Exception{
+	        return ((PubSubManagementPlugin)this.getPlugin(this.PUBLISHER_MANAGEMENT_PLUGIN_URI)).getPublicationPortURI();
+	  }
+	 
+	 
+	 
 	
 }

@@ -17,8 +17,6 @@ import gestMessages.interfaces.ReceptionCI;
 import gestMessages.ports.ManagementOutboundPort;
 import gestMessages.ports.ReceptionInboundPort;
 import messages.MessageI;
-@RequiredInterfaces(required = {ManagementCI.class})
-@OfferedInterfaces(offered = {ReceptionCI.class})
 public class Subscriber extends AbstractComponent {
 
 	protected String		uriPrefix;

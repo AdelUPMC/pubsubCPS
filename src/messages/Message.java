@@ -52,6 +52,8 @@ public class Message implements MessageI {
 		return content;
 	}
 
-	
-
+	@Override
+	public String toString() {
+		return "Message [uri=" + uri + "]";
+	}
 }
