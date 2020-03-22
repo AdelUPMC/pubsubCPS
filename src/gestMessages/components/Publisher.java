@@ -14,16 +14,12 @@ import messages.MessageI;
 
 
 public class Publisher extends AbstractComponent {
-	protected String PUBLISHER_PUBLICATION_PLUGIN_URI = "publication_clientSide_PluginURI-" ;
-    protected String PUBLISHER_MANAGEMENT_PLUGIN_URI = "management_clientSide_PluginURI-" ;
+	protected String PUBLISHER_PUBLICATION_PLUGIN_URI = "publisher_publication_URI-" ;
+    protected String PUBLISHER_MANAGEMENT_PLUGIN_URI = "publisher_management_URI-" ;
     private PubSubManagementPlugin managementPlugin;
     private PublisherPublicationPlugin publicationPlugin;
     private static int nbpublishers = 0;
-    /*
-	protected PublicationOutboundPort	publicationObp;
-	protected ManagementOutboundPort	managementObp;
-	protected final String publishURI="handler-publish";
-*/
+   
     protected Publisher() throws Exception {
     	//1 thread, 0 schedulable thread
         this(1, 0);
@@ -64,10 +60,16 @@ public class Publisher extends AbstractComponent {
 		this.installPlugin(publicationPlugin);
 		this.installPlugin(managementPlugin);
 		
-		/**Scenario de test:
-		 * on va tester les 4 méthodes publish de PUBLICATIONCI
+		/**à tester:
+		 * -4 méthodes publish de PUBLICATIONCI
+		 * scnénario: un seul publieur va publier:
+		 * 		-un message sur un topic
+		 * 		-un message sur plusieurs topics
+		 * 		-plusieurs messages sur un topic
+		 * 		-plusieurs messages sur plusieurs topics
 		 * **/
-		 Thread.sleep(150);
+		
+		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
 		 publish(new Message("Hello world from C++"),"C++");
 		 publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
 		 publish(new Message[] {new Message("Hello world from C"),new Message("Hello world from Rust")},"Imperative programming");

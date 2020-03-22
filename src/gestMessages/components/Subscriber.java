@@ -14,135 +14,152 @@ import fr.sorbonne_u.components.exceptions.InvariantException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
 import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.ReceptionCI;
+import gestMessages.plugins.PubSubManagementPlugin;
+import gestMessages.plugins.PublisherPublicationPlugin;
+import gestMessages.plugins.SubscriberReceptionPlugin;
 import gestMessages.ports.ManagementOutboundPort;
 import gestMessages.ports.ReceptionInboundPort;
+import messages.Message;
+import messages.MessageFilterI;
 import messages.MessageI;
 public class Subscriber extends AbstractComponent {
 
-	protected String		uriPrefix;
-	protected ManagementOutboundPort	portm;
-	private ArrayList<MessageI> myMessages;
-
-
-	protected Subscriber(String uri,String receptionInboundPortURI,String managementOutboundPortURI)
-			throws Exception{
-		super(uri, 0, 1) ;
-		// TODO Auto-generated constructor stub
-		assert	uri != null :
-			new PreconditionException("uri can't be null!");
-		assert	receptionInboundPortURI != null :
-			new PreconditionException("error receptionInboundPortURI null");
-		
-		assert	managementOutboundPortURI != null :
-			new PreconditionException("error managementoutboundPortURI null") ;
-		
-		uriPrefix=uri;
-		//System.out.println(receptionInboundPortURI);
-		ReceptionInboundPort p = new ReceptionInboundPort(receptionInboundPortURI, this) ;
-		p.localPublishPort();
-		
-		
-		this.portm= new ManagementOutboundPort(managementOutboundPortURI,this);
-		this.portm.publishPort();
-		//System.out.println("constructeur Subscriber");
-		// publish the port
+    protected String SUBSCRIBER_MANAGEMENT_PLUGIN_URI = "subscriber_management_URI-" ;
+    protected String SUBSCRIBER_RECEPTION_PLUGIN_URI = "subscriber_reception_URI-" ;
+    private PubSubManagementPlugin managementPlugin;
+    private SubscriberReceptionPlugin receptionPlugin;
+    protected String receptionInboundPortURI = "software_developer_URI-";
+    private static int nbsubscribers = 0;
+    protected Subscriber(String receptionInboundPortURI) throws Exception {
+    	this(receptionInboundPortURI, 1,0);
+    }
+    
+	protected Subscriber(String receptionInboundPortURI,int nbThreads,int nbSchedulableThreads) throws Exception {
+		//1 thread, 0 schedulable thread
+		super(receptionInboundPortURI, 1,0);
+		synchronized(this) {
+			nbsubscribers++;
+			this.SUBSCRIBER_RECEPTION_PLUGIN_URI = this.SUBSCRIBER_RECEPTION_PLUGIN_URI + nbsubscribers;
+	        this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI = this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI + nbsubscribers;
+	        this.receptionInboundPortURI = this.receptionInboundPortURI + nbsubscribers;
+		}
 		
 		if (AbstractCVM.isDistributed) {
-			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
+			this.executionLog.setDirectory(System.getProperty("user.dir"));
 		} else {
-			this.executionLog.setDirectory(System.getProperty("user.home")) ;
+			this.executionLog.setDirectory(System.getProperty("user.home"));
 		}
-		this.tracer.setTitle("Subscriber") ;
-		this.tracer.setRelativePosition(1, 1) ;
-		portm.doConnection(uri, ManagementConnector.class.getCanonicalName());
-		//this.doPortConnection(uri, managementOutboundPortURI, ManagementConnector.class.getCanonicalName());
+		this.tracer.setTitle("software_developer-"+nbsubscribers);
+		this.tracer.setRelativePosition(nbsubscribers, 2) ;
 	}
+
+	@Override
+	public void start() throws ComponentStartException{
+		super.start() ;
+		this.logMessage("starting component subscriber "+Subscriber.nbsubscribers);
+    }
+	/**
+	 * à tester: 3 méthodes subscribe(), modifyfilter(),unsubscribe(), 2 méthodes acceptMessage()
+	 * scénario: un subscriber va s'abonner en utilisant les 3 méthodes subscribe
+	 * 	
+	 * **/
+	public void execute() throws Exception{
+		//create plugings
+		this.receptionPlugin=new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
+		this.managementPlugin=new PubSubManagementPlugin();
+		
+		//install them
+		receptionPlugin.setPluginURI(this.SUBSCRIBER_RECEPTION_PLUGIN_URI);
+		managementPlugin.setPluginURI(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI);
+		this.installPlugin(receptionPlugin);
+		this.installPlugin(managementPlugin);
+		
+		
+		 subscribe("C++",receptionPlugin.receptionInboundPortURI);
+		 subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
+		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
+
+	}
+
+	@Override
+	 public void			finalise() throws Exception{
+	        this.logMessage("finalising component subscriber "+Subscriber.nbsubscribers) ;
+	        super.finalise();
+	 }
 	
+	@Override
+	 public void			shutdown()  throws ComponentShutdownException{
+	        this.logMessage("shutdown : component subscriber "+Subscriber.nbsubscribers) ;
+	        super.shutdown();
+	 }
+	
+	@Override
+	 public void			shutdownNow()  throws ComponentShutdownException{
+	        this.logMessage("shutdownNow : component subscriber "+Subscriber.nbsubscribers) ;
+	        super.shutdownNow();
+	 }
+	
+	//ReceptionCI
 	public void acceptMessage(MessageI m) throws Exception {
-		System.out.println("accept message : URI="+m.getURI());
-		if (m.getPayload() instanceof String)
-			System.out.println("contenu du message: "+((String)m.getPayload()));
+		this.logMessage("Accept message:"+m.getURI());
 	}
 	public void acceptMessages(MessageI[] ms) throws Exception {
-		System.out.println("accept messages :");
-		for(int i=0;i<ms.length;i++) {
-			System.out.println("message "+i+" : uri="+ms[i].getURI());
-		}
+		for (MessageI m : ms) {
+			acceptMessage(m);
+	    }
 	}
 	
-	public void testManagement()
-	{
-		try {	
-			System.out.println("Je vais vraiment crash!!!");
-			this.portm.createTopic("CPS subscriber");
-			this.logMessage("Topic created by a publisher");
-		} catch (Exception e) {
-			//System.out.println("Presque !!");
-			e.printStackTrace();
-				}
-		
-	}
-	
-	public void			start() throws ComponentStartException
-	{
-		System.out.println("Subscriber Start !!!!!!!!!!!!!!!");
-		super.start();
-		this.logMessage("starting subscriber component.") ;
-		this.scheduleTask(
-				new AbstractComponent.AbstractTask() {
-					@Override
-					public void run() {
-						try {
-							System.out.println("Start subscriber!");
+	//ManagementCI
+	 public void subscribe(String topic, String inboundPortURI)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, inboundPortURI);
+	  }
 
-							//((Subscriber)this.getTaskOwner()).testManagement();
-						} catch (Exception e) {
-							throw new RuntimeException(e) ;
-						}
-					}
-				},
-				1000, TimeUnit.MILLISECONDS);
-
-	}
+	 public void subscribe(String[] topics, String inboundPortURI)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topics, inboundPortURI);
+	 }
+	 public void subscribe(String topic, MessageFilterI filter, String inboundPortURI) throws Exception{
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic,filter, inboundPortURI);
+	  }
+	 public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortURI) throws Exception{
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, newFilter, inboundPortURI);
+	  }
+	 public void unsubscribe(String topic, String inboundPortUri) throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).unsubscribe(topic, inboundPortUri);
+	    }
+	 public void createTopic(String topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).createTopic(topic);
+	  }
+	 public void createTopics(String[] topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).createTopics(topic);
+	  }
+	 
+	 public void destroyTopic(String topic)throws Exception {
+	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).destroyTopic(topic);
+	  }
+	 public boolean isTopic(String topic) throws Exception{
+	        return  ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).isTopic(topic);
+	  }
+	 
+	 public String[] getTopics() throws Exception{
+	        return ((PubSubManagementPlugin)this.getPlugin(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).getTopics();
+	  }
+	 
+	 public String getPublicationPortURI() throws Exception{
+	        return ((PubSubManagementPlugin)this.getPlugin(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).getPublicationPortURI();
+	  }
 	
-	@Override
-	public void			finalise() throws Exception
-	{
-		this.logMessage("stopping subscriber component.") ;
-		this.printExecutionLogOnFile("subscriber") ;
-		this.portm.doDisconnection();
-		//this.portm.unpublishPort();
-		super.finalise();
-	}
 	
 	
-	/*
-	@Override
-	public void			shutdown() throws ComponentShutdownException
-	{
-		System.out.println("Shutdown Sub");
-		
-		try {
-			this.portm.unpublishPort();
-			this.portm.destroyPort();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-
-		
 	
-	}*/
 	
-	protected static void	checkInvariant(Subscriber s)
-	{
-		assert	s.uriPrefix != null :
-					new InvariantException("The URI prefix is null!") ;
-		assert	s.isOfferedInterface(ReceptionCI.class) :
-					new InvariantException("The URI component should "
-							+ "offer the interface URIProviderI!") ;
-	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 
 }
