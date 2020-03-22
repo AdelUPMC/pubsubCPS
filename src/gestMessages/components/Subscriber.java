@@ -4,11 +4,12 @@ import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
+import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
 import messages.MessageFilterI;
 import messages.MessageI;
-public class Subscriber extends AbstractComponent {
+public class Subscriber extends AbstractComponent implements ReceptionCI {
 
     protected String SUBSCRIBER_MANAGEMENT_PLUGIN_URI = "subscriber_management_URI-" ;
     protected String SUBSCRIBER_RECEPTION_PLUGIN_URI = "subscriber_reception_URI-" ;
@@ -61,18 +62,20 @@ public class Subscriber extends AbstractComponent {
 		//install them
 		receptionPlugin.setPluginURI(this.SUBSCRIBER_RECEPTION_PLUGIN_URI);
 		managementPlugin.setPluginURI(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI);
-		this.installPlugin(receptionPlugin);
+		System.out.println("[Subscriber:execute] je veux creeer un topic");
 		
 		this.installPlugin(managementPlugin);
+		this.installPlugin(receptionPlugin);
 		/**
 		 * � tester: 3 m�thodes subscribe(), modifyfilter(),unsubscribe(), 2 m�thodes acceptMessage()
 		 * sc�nario: un subscriber va s'abonner en utilisant les 3 m�thodes subscribe
 		 * 	
 		 * **/
 		
-		System.out.println("[Subscriber:execute] je veux creeer un topics");
+		System.out.println("[Subscriber:execute] je veux creeer un topic");
+		this.createTopic("C++");
 		this.createTopic("Anas");
-		// subscribe("C++", receptionPlugin.receptionInboundPortURI);
+		subscribe("C++", receptionPlugin.receptionInboundPortURI);
 		 
 		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
 		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
@@ -99,8 +102,8 @@ public class Subscriber extends AbstractComponent {
 	
 	//ReceptionCI
 	public void acceptMessage(MessageI m) throws Exception {
-		System.out.println("acceptMessage " + m.toString());
-		this.logMessage("Accept message:"+m.getURI());
+		System.out.println("[Subsriber:acceptMessage] " + m.getPayload());
+		this.logMessage("[Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 	}
 	public void acceptMessages(MessageI[] ms) throws Exception {
 		for (MessageI m : ms) {

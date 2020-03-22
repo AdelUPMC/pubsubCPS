@@ -66,14 +66,12 @@ public class CVM extends AbstractCVM {
 	
 		assert	this.isDeployedComponent(this.brokerURI) ;
 		
-		this.toggleTracing(this.brokerURI) ;
-		System.out.println("broker cree");
-//<<<<<<< HEAD
-		// create the publisher component
-		
+		this.subscriberURI_01 =ComponentFactory.createSubscriber(ManagementOutboundPortURIsub);				
 		this.publisherURI_01 =ComponentFactory.createPublisher(PublicationOutboundPortURI, ManagementOutboundPortURIpub);
 		
-		this.subscriberURI_01 =ComponentFactory.createSubscriber(ManagementOutboundPortURIsub);				
+		this.toggleTracing(this.brokerURI);
+		this.toggleTracing(this.publisherURI_01);
+		this.toggleTracing(this.subscriberURI_01);
 	
 		
 		super.deploy();	
@@ -122,7 +120,7 @@ public class CVM extends AbstractCVM {
 			// Execute the application.
 			a.startStandardLifeCycle(2500L) ;
 			// Give some time to see the traces (convenience).
-			Thread.sleep(10000L) ;
+			Thread.sleep(100000L) ;
 			// Simplifies the termination (termination has yet to be treated
 			// properly in BCM).
 			System.exit(0) ;

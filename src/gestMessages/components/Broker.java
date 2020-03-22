@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import fr.sorbonne_u.components.AbstractComponent;
+import fr.sorbonne_u.components.ComponentState;
+import fr.sorbonne_u.components.ComponentStateI;
 import fr.sorbonne_u.components.annotations.OfferedInterfaces;
 import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
@@ -127,28 +129,22 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	@Override
 	public void	start() throws ComponentStartException{
 		super.start();
+		logMessage("[start] done");
 	}
 	
 	@Override
 	public void execute() throws Exception{
 		super.execute();
 		this.createNewExecutorService(publishMessageURI, 5,true);
-		subscribe("C++", "software_developer_URI-1");
-		/*this.createNewExecutorService(acceptURI,2,true);
-		handleRequestAsync(acceptURI,new AbstractComponent.AbstractService<Void>() {
-			@Override
-			public Void call() throws Exception {
-				((Broker)this.getServiceOwner()).observerPublished();
-				return null;
-			}
-		});*/
+		logMessage("[Execute] done");
 	}
 	
 	public void sendpublished(MessageI m,String topic)throws Exception {
-		ArrayList<String> uris=abonnement.get(topic);
-		for(String abonne_uri: uris) {
-			ReceptionOutboundPort ri=subsobp.get(abonne_uri);
-		/*	if(!published.containsKey(ri)) {
+		ArrayList<String> uris = abonnement.get(topic);
+		for(String abonne_uri: uris)
+		{
+			ReceptionOutboundPort ri = subsobp.get(abonne_uri);
+			/*	if(!published.containsKey(ri)) {
 				ArrayList<MessageI> pubmessages= new ArrayList<>();
 				pubmessages.add(m);
 				published.put(ri, pubmessages);
@@ -158,20 +154,24 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 				pubmessages.add(m);
 				published.put(ri, pubmessages);
 			}
-		}
-		*/
-		if (ri != null)
+			}
+			 */
+			if (ri != null)
 			{
-				System.out.println("try to send  " + m);
+				logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri);
 				ri.acceptMessage(m);
 			}
-		else
-		{
-			System.out.println("Il n'y a aucun abonner");
+			else
+			{
+				System.out.println("[sendPublished] PROBLEME un abooner n'est pas connecter");
+			}
 		}
+		if (uris == null || uris.isEmpty())
+			logMessage("[sendpulished] aucun abonner au topic :" + topic);
+		System.out.println("[Broker:sendpublished] fin");
 	}
-	}
-	public void observerPublished() throws Exception {
+	
+	/*public void observerPublished() throws Exception {
 		while(true) {
 			//Thread.sleep(150L);
 			if (!published.isEmpty()) {
@@ -185,33 +185,25 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 				}
 			}
 		}
-	}
+	}*/
+	
 	/*PublicationCI*/
 	public void publish(MessageI m, String topic)throws Exception {
+			logMessage("[publish] try to publish : " + m.getPayload());
+			System.out.println("broker publish :" + m.getPayload());
 			lock.writeLock().lock();
 		try {
-			if(!messages.containsKey(topic)) 
-				createTopic(topic);
-		//	lm = messages.get(topic);
-		//	lm.add(m);
 			this.runTask(publishMessageURI, (ignore) -> { 	// ignore : @Type ComponentI 
 		        try {
 		        	System.out.println("debut runTask publish");
 		        	sendpublished(m, topic);
-		        } catch (Exception e) {
-		        	
+		        } catch (Exception e) {	
 		            e.printStackTrace();
 		        }
 		    });
-			//System.out.println("Broker topic =  " + topic);
 		}finally {
-			sendpublished(m,topic);
 			lock.writeLock().unlock();
-		}
-			//sendMessages(topic);}// à débattre s'il faut le faire en exclusion mutuelle ou non
-		
-		
-		
+		}	
 	}
 	
 	public void publish(MessageI m, String []topics)throws Exception {
@@ -223,52 +215,69 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	/*ManagementCI*/
 	public void createTopic(String topic) throws Exception{
-
 		if(!this.abonnement.containsKey(topic)) {
 			this.abonnement.put(topic, new ArrayList<String>());
-			System.out.println("Broker created topic :" + topic);
+			logMessage("[createTopic] " + topic);
 		}
 		else {
-			System.out.println("topic"+topic+" already exists");
+			logMessage("[createTopic] " + topic + " already exists");
 		}
 	}
+	
 	public void createTopics(String[] topics)throws Exception{
 		for(String t : topics) {
 			createTopic(t);
 		}
 	}
+	
 	public void destroyTopic(String topic)throws Exception{
-		this.abonnement.remove(topic);
-		System.out.println("Broker destroyed topic :" + topic);
-		
+		if (this.abonnement.get(topic) != null)
+		{
+			this.abonnement.get(topic).clear();
+			this.abonnement.remove(topic);
+			logMessage("[destroyTopic] destroy " + topic);
+		}
+		else
+			logMessage("[destroyTopic] topic nonexistent");
+		System.out.println("Broker destroyed topic :" + topic);	
 	}
+	
 	public boolean isTopic(String topic)throws Exception{
 		return this.abonnement.containsKey(topic);
 	}
+	
 	//TODO SubscriptionImplementation 
 	public void subscribe(String topic, String inboundPortUri) throws Exception{
 		ArrayList<String> subsriber;
-		
-		if(!subsobp.containsKey(inboundPortUri)) {
+		logMessage("[subscribe] " + inboundPortUri + " to " + topic + "");
+	//	System.out.println("[Broker:subscribe] " + inboundPortUri + " topic -> " +  topic);
+		if(!subsobp.containsKey(inboundPortUri))
+		{
 			nbSubscriber++;
 			String uriSub = inboundPortUri + nbSubscriber;
 			ReceptionOutboundPort ropTmp =  new ReceptionOutboundPort(uriSub,this);
-			subsobp.put(inboundPortUri, ropTmp);
+			ropTmp.publishPort();
+			subsobp.put(inboundPortUri, ropTmp);			
 			this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
+			System.out.println("[Broker:subscribe] " + inboundPortUri + " doport connection done");
 		}
 		if(!abonnement.containsKey(topic))
 		{
-			System.out.println("Ce topic n'existe pas !!!!!!!!!!!!");
-			// on peut le creer !
-			return ;
+			System.out.println("Ce topic n'existe pas !!");
+			createTopic(topic);
 		}
-	
 		subsriber = abonnement.get(topic);		
+		System.out.println("[fin sub]" + topic);
 		if (subsriber.contains(inboundPortUri))
+		{
+			logMessage("[subscribe] " + inboundPortUri + "est deja aboné au topic " + topic );
 			System.out.println("Vous etes deja abonné");
+		}
 		else
+		{
 			subsriber.add(inboundPortUri);
-		
+			logMessage("[subscribe] " + inboundPortUri + " to " + topic + " done");
+		}
 	}
 
 	public void subscribe(String[] topics, String inboundPortUri)throws Exception{
@@ -286,6 +295,8 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	public String[] getTopics()throws Exception{
 		return null;
 	}
+	
+	
 	/*@Override
 	public void				finalise() throws Exception
 	{
@@ -297,10 +308,10 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 
 	@Override
 	public String getPublicationPortURI() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	
 	/*
 	public void testAccept()
 	{
@@ -316,9 +327,6 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			e.printStackTrace();
 		}
 		*/
-
-		
-		
 }
 	
 
