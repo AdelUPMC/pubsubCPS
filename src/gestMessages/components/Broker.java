@@ -15,6 +15,7 @@ import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.PostconditionException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
 import gestMessages.connectors.ManagementConnector;
+import gestMessages.connectors.ReceptionConnector;
 import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.PublicationCI;
 import gestMessages.interfaces.ReceptionCI;
@@ -55,6 +56,8 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	protected String uriPrefix;
 	//protected String managementInboundPortURI;
 	protected final String acceptURI="handler-accept";
+	protected final String publishMessageURI = "message-URI";
+	private int 							nbSubscriber;
 	
 	private Map<String,ArrayList<MessageI>> messages;
 	private Map<String,ArrayList<String>> abonnement;
@@ -69,7 +72,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		super(nbThreads, nbSchedulableThreads);
 	}
 	
-	protected Broker(String uri,String PublicationInboundPortURI,String ManagementInboundPortURI)throws Exception {
+	protected Broker(String uri,String PublicationInboundPortURI, String ManagementInboundPortURI)throws Exception {
 		
 		super(uri, 0, 1) ;
 		assert	uri != null :
@@ -123,26 +126,28 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 
 	@Override
 	public void	start() throws ComponentStartException{
-
+		super.start();
 	}
 	
 	@Override
 	public void execute() throws Exception{
-		this.createNewExecutorService(acceptURI,2,true);
+		super.execute();
+		this.createNewExecutorService(publishMessageURI, 5,true);
+		/*this.createNewExecutorService(acceptURI,2,true);
 		handleRequestAsync(acceptURI,new AbstractComponent.AbstractService<Void>() {
 			@Override
 			public Void call() throws Exception {
 				((Broker)this.getServiceOwner()).observerPublished();
 				return null;
 			}
-		});
+		});*/
 	}
 	
-	public void sendpublished(MessageI m,String topic) {
+	public void sendpublished(MessageI m,String topic)throws Exception {
 		ArrayList<String> uris=abonnement.get(topic);
 		for(String abonne_uri: uris) {
 			ReceptionOutboundPort ri=subsobp.get(abonne_uri);
-			if(!published.containsKey(ri)) {
+		/*	if(!published.containsKey(ri)) {
 				ArrayList<MessageI> pubmessages= new ArrayList<>();
 				pubmessages.add(m);
 				published.put(ri, pubmessages);
@@ -153,6 +158,17 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 				published.put(ri, pubmessages);
 			}
 		}
+		*/
+		if (ri != null)
+			{
+				System.out.println("try to send  " + m);
+				ri.acceptMessage(m);
+			}
+		else
+		{
+			System.out.println("Il n'y a aucun abonner");
+		}
+	}
 	}
 	public void observerPublished() throws Exception {
 		while(true) {
@@ -171,19 +187,21 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	/*PublicationCI*/
 	public void publish(MessageI m, String topic)throws Exception {
-		ArrayList<MessageI> lm;
-		lock.writeLock().lock();
+			lock.writeLock().lock();
 		try {
 			if(!messages.containsKey(topic)) 
 				createTopic(topic);
-	/*//			lm=new ArrayList<MessageI>();
-		//		lm.add(m);
-			//	messages.put(topic,lm);
-			}else
-			{
-		*/		lm = messages.get(topic);
-				lm.add(m);
-			
+		//	lm = messages.get(topic);
+		//	lm.add(m);
+			this.runTask(publishMessageURI, (ignore) -> { 	// ignore : @Type ComponentI 
+		        try {
+		        	System.out.println("debut runTask publish");
+		        	sendpublished(m, topic);
+		        } catch (Exception e) {
+		        	
+		            e.printStackTrace();
+		        }
+		    });
 			//System.out.println("Broker topic =  " + topic);
 		}finally {
 			sendpublished(m,topic);
@@ -231,12 +249,16 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		ArrayList<String> subsriber;
 		
 		if(!subsobp.containsKey(inboundPortUri)) {
-			subsobp.put(inboundPortUri, new ReceptionOutboundPort(inboundPortUri,this));
-			this.doPortConnection(uriPrefix, inboundPortUri,ManagementConnector.class.getCanonicalName());
+			nbSubscriber++;
+			String uriSub = inboundPortUri + nbSubscriber;
+			ReceptionOutboundPort ropTmp =  new ReceptionOutboundPort(uriSub,this);
+			subsobp.put(inboundPortUri, ropTmp);
+			this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
 		}
 		if(!abonnement.containsKey(topic))
 		{
 			System.out.println("Ce topic n'existe pas !!!!!!!!!!!!");
+			// on peut le creer !
 			return ;
 		}
 	
@@ -247,6 +269,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			subsriber.add(inboundPortUri);
 		
 	}
+
 	public void subscribe(String[] topics, String inboundPortUri)throws Exception{
 		
 	}

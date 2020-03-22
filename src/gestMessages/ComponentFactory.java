@@ -12,13 +12,14 @@ public class ComponentFactory {
 	protected static String createSubscriber(String managementOBPURI) throws Exception
 	{
 		String uri = "SUBSCRIBERURI-" + numberSubsribers;
-		String receptionIBPuri = "SUBRECEPTIONIBPURI" + numberSubsribers;
+		//String receptionIBPuri = "SUBRECEPTIONIBPURI" + numberSubsribers;
 		
 		numberSubsribers++;
+		System.out.println("[factory:creatSubscriber]");
 		return 
 				AbstractComponent.createComponent(
 						Subscriber.class.getCanonicalName(),
-						new Object[]{uri,receptionIBPuri,managementOBPURI});	
+						new Object[]{uri,1,1});//receptionIBPuri,managementOBPURI});	
 	}
 
 	protected  static String createPublisher(String publicationoutboundPortURI, String managementoutboundPortURI) throws Exception
@@ -29,7 +30,7 @@ public class ComponentFactory {
 		return 
 				AbstractComponent.createComponent(
 						Publisher.class.getCanonicalName(),
-						new Object[]{uri,publicationoutboundPortURI,managementoutboundPortURI});	
+						new Object[]{1,1});//uri,publicationoutboundPortURI, managementoutboundPortURI});	
 	}
 
 }

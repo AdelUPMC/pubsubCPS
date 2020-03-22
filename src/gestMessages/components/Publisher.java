@@ -27,7 +27,7 @@ public class Publisher extends AbstractComponent {
     
 	protected Publisher(int nbThreads,int nbSchedulableThreads) throws Exception {
 		//1 thread, 0 schedulable thread
-		super(1, 0) ;
+		super(nbThreads, nbSchedulableThreads) ;
 		synchronized(this) {
 			nbpublishers++;
 			this.PUBLISHER_PUBLICATION_PLUGIN_URI = this.PUBLISHER_PUBLICATION_PLUGIN_URI + nbpublishers;
@@ -60,21 +60,21 @@ public class Publisher extends AbstractComponent {
 		this.installPlugin(publicationPlugin);
 		this.installPlugin(managementPlugin);
 		
-		/**à tester:
-		 * -4 méthodes publish de PUBLICATIONCI
-		 * scnénario: un seul publieur va publier:
+		/**ï¿½ tester:
+		 * -4 mï¿½thodes publish de PUBLICATIONCI
+		 * scnï¿½nario: un seul publieur va publier:
 		 * 		-un message sur un topic
 		 * 		-un message sur plusieurs topics
 		 * 		-plusieurs messages sur un topic
 		 * 		-plusieurs messages sur plusieurs topics
 		 * **/
 		
-		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
-		 publish(new Message("Hello world from C++"),"C++");
-		 publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
+	//	 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
+		// publish(new Message("Hello world from C++"),"C++");
+		 /*publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
 		 publish(new Message[] {new Message("Hello world from C"),new Message("Hello world from Rust")},"Imperative programming");
 		 publish(new Message[] {new Message("Hello world from OCaml"),new Message("Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
-		
+	*/	
 	}
 	
 	@Override

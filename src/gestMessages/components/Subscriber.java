@@ -30,13 +30,13 @@ public class Subscriber extends AbstractComponent {
     private SubscriberReceptionPlugin receptionPlugin;
     protected String receptionInboundPortURI = "software_developer_URI-";
     private static int nbsubscribers = 0;
-    protected Subscriber(String receptionInboundPortURI) throws Exception {
-    	this(receptionInboundPortURI, 1,0);
+    protected Subscriber(String reflexionURI) throws Exception {
+    	this(reflexionURI, 1,0);
     }
     
-	protected Subscriber(String receptionInboundPortURI,int nbThreads,int nbSchedulableThreads) throws Exception {
+	protected Subscriber(String reflectionURI,int nbThreads,int nbSchedulableThreads) throws Exception {
 		//1 thread, 0 schedulable thread
-		super(receptionInboundPortURI, 1,0);
+		super(reflectionURI, nbThreads, nbSchedulableThreads);
 		synchronized(this) {
 			nbsubscribers++;
 			this.SUBSCRIBER_RECEPTION_PLUGIN_URI = this.SUBSCRIBER_RECEPTION_PLUGIN_URI + nbsubscribers;
@@ -49,8 +49,10 @@ public class Subscriber extends AbstractComponent {
 		} else {
 			this.executionLog.setDirectory(System.getProperty("user.home"));
 		}
+		
 		this.tracer.setTitle("software_developer-"+nbsubscribers);
 		this.tracer.setRelativePosition(nbsubscribers, 2) ;
+		System.out.println("Subscriber crÃ©e");
 	}
 
 	@Override
@@ -58,25 +60,30 @@ public class Subscriber extends AbstractComponent {
 		super.start() ;
 		this.logMessage("starting component subscriber "+Subscriber.nbsubscribers);
     }
+	
 	/**
-	 * à tester: 3 méthodes subscribe(), modifyfilter(),unsubscribe(), 2 méthodes acceptMessage()
-	 * scénario: un subscriber va s'abonner en utilisant les 3 méthodes subscribe
+	 * ï¿½ tester: 3 mï¿½thodes subscribe(), modifyfilter(),unsubscribe(), 2 mï¿½thodes acceptMessage()
+	 * scï¿½nario: un subscriber va s'abonner en utilisant les 3 mï¿½thodes subscribe
 	 * 	
 	 * **/
 	public void execute() throws Exception{
 		//create plugings
-		this.receptionPlugin=new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
-		this.managementPlugin=new PubSubManagementPlugin();
+		this.receptionPlugin = new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
+		this.managementPlugin = new PubSubManagementPlugin();
+		
 		
 		//install them
 		receptionPlugin.setPluginURI(this.SUBSCRIBER_RECEPTION_PLUGIN_URI);
 		managementPlugin.setPluginURI(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI);
 		this.installPlugin(receptionPlugin);
+		
 		this.installPlugin(managementPlugin);
 		
-		
-		 subscribe("C++",receptionPlugin.receptionInboundPortURI);
-		 subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
+		System.out.println("[Subscriber:execute] je veux creeer un topics");
+		this.createTopic("Anas");
+		// subscribe("C++", receptionPlugin.receptionInboundPortURI);
+		 
+		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
 		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
 
 	}
@@ -101,6 +108,7 @@ public class Subscriber extends AbstractComponent {
 	
 	//ReceptionCI
 	public void acceptMessage(MessageI m) throws Exception {
+		System.out.println("acceptMessage " + m.toString());
 		this.logMessage("Accept message:"+m.getURI());
 	}
 	public void acceptMessages(MessageI[] ms) throws Exception {
