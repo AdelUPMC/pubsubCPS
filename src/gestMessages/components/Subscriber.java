@@ -1,25 +1,11 @@
 package gestMessages.components;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import fr.sorbonne_u.components.AbstractComponent;
-import fr.sorbonne_u.components.annotations.OfferedInterfaces;
-import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
-import fr.sorbonne_u.components.examples.pipeline.connectors.ManagementConnector;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
-import fr.sorbonne_u.components.exceptions.InvariantException;
-import fr.sorbonne_u.components.exceptions.PreconditionException;
-import gestMessages.interfaces.ManagementCI;
-import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
-import gestMessages.plugins.PublisherPublicationPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
-import gestMessages.ports.ManagementOutboundPort;
-import gestMessages.ports.ReceptionInboundPort;
-import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
 public class Subscriber extends AbstractComponent {
@@ -58,11 +44,7 @@ public class Subscriber extends AbstractComponent {
 		super.start() ;
 		this.logMessage("starting component subscriber "+Subscriber.nbsubscribers);
     }
-	/**
-	 * à tester: 3 méthodes subscribe(), modifyfilter(),unsubscribe(), 2 méthodes acceptMessage()
-	 * scénario: un subscriber va s'abonner en utilisant les 3 méthodes subscribe
-	 * 	
-	 * **/
+	
 	public void execute() throws Exception{
 		//create plugings
 		this.receptionPlugin=new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
@@ -74,6 +56,11 @@ public class Subscriber extends AbstractComponent {
 		this.installPlugin(receptionPlugin);
 		this.installPlugin(managementPlugin);
 		
+		/**
+		 * à tester: 3 méthodes subscribe(), modifyfilter(),unsubscribe(), 2 méthodes acceptMessage()
+		 * scénario: un subscriber va s'abonner en utilisant les 3 méthodes subscribe
+		 * 	
+		 * **/
 		
 		 subscribe("C++",receptionPlugin.receptionInboundPortURI);
 		 subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
