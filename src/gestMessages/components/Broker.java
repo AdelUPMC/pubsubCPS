@@ -133,6 +133,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	public void execute() throws Exception{
 		super.execute();
 		this.createNewExecutorService(publishMessageURI, 5,true);
+		subscribe("C++", "software_developer_URI-1");
 		/*this.createNewExecutorService(acceptURI,2,true);
 		handleRequestAsync(acceptURI,new AbstractComponent.AbstractService<Void>() {
 			@Override
@@ -285,14 +286,14 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	public String[] getTopics()throws Exception{
 		return null;
 	}
-	@Override
+	/*@Override
 	public void				finalise() throws Exception
 	{
 		
 		for (String uriReception: subsobp.keySet()) {
 			this.doPortDisconnection(uriReception);			
 		}
-	}
+	}*/
 
 	@Override
 	public String getPublicationPortURI() throws Exception {

@@ -1,25 +1,11 @@
 package gestMessages.components;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import fr.sorbonne_u.components.AbstractComponent;
-import fr.sorbonne_u.components.annotations.OfferedInterfaces;
-import fr.sorbonne_u.components.annotations.RequiredInterfaces;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
-import fr.sorbonne_u.components.examples.pipeline.connectors.ManagementConnector;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
-import fr.sorbonne_u.components.exceptions.InvariantException;
-import fr.sorbonne_u.components.exceptions.PreconditionException;
-import gestMessages.interfaces.ManagementCI;
-import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
-import gestMessages.plugins.PublisherPublicationPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
-import gestMessages.ports.ManagementOutboundPort;
-import gestMessages.ports.ReceptionInboundPort;
-import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
 public class Subscriber extends AbstractComponent {
@@ -78,6 +64,11 @@ public class Subscriber extends AbstractComponent {
 		this.installPlugin(receptionPlugin);
 		
 		this.installPlugin(managementPlugin);
+		/**
+		 * � tester: 3 m�thodes subscribe(), modifyfilter(),unsubscribe(), 2 m�thodes acceptMessage()
+		 * sc�nario: un subscriber va s'abonner en utilisant les 3 m�thodes subscribe
+		 * 	
+		 * **/
 		
 		System.out.println("[Subscriber:execute] je veux creeer un topics");
 		this.createTopic("Anas");

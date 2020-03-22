@@ -69,8 +69,9 @@ public class Publisher extends AbstractComponent {
 		 * 		-plusieurs messages sur plusieurs topics
 		 * **/
 		
-	//	 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
-		// publish(new Message("Hello world from C++"),"C++");
+		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
+		 System.out.println("[Publisher:execute] tente de publier");
+		 publish(new Message("Hello world from C++"),"C++");
 		 /*publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
 		 publish(new Message[] {new Message("Hello world from C"),new Message("Hello world from Rust")},"Imperative programming");
 		 publish(new Message[] {new Message("Hello world from OCaml"),new Message("Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
