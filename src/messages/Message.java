@@ -28,8 +28,9 @@ public class Message implements MessageI {
 	}
 	
 	//for tests
-	public Message(Serializable content ) {
-		this.content=content;
+	public Message(String uri, Serializable content ) {
+		this.uri = uri;
+		this.content=content;		
 	}
 
 	@Override
@@ -54,6 +55,6 @@ public class Message implements MessageI {
 
 	@Override
 	public String toString() {
-		return "Message [uri=" + uri + "]";
+		return "Message [uri=" + uri + "  " + this.content + "]";
 	}
 }

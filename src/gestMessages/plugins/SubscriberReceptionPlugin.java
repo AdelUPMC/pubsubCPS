@@ -24,23 +24,14 @@ public class SubscriberReceptionPlugin extends AbstractPlugin implements Recepti
         this.pluginURI2= pluginURI;
          this.receptionInboundPortURI=receptionInboundPortUri;
     }
-/*uri != null and owner != null and implementedInterface != null
- pre	pluginURI != null
- pre	OfferedI.class.isAssignableFrom(implementedInterface)
- pre	implementedInterface.isAssignableFrom(this.getClass())
- pre	this.getOwner().isInstalled(pluginURI)
-	 */
+
     @Override
     public void			installOn(ComponentI owner) throws Exception
     {
-    	
         super.installOn(owner) ;
         
         assert	owner instanceof ReceptionCI ;        
         this.addOfferedInterface(ReceptionCI.class) ;
-        assert	pluginURI2 != null :
-			new PreconditionException("pluginURI != null") ;
-         System.out.println("crash car "  + receptionInboundPortURI + "   " + this.getPluginURI());
         System.out.println("fin install ON ");
     }
     
