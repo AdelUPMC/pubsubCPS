@@ -59,7 +59,6 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			
 	 */
 	protected String uriPrefix;
-	//protected String managementInboundPortURI;
 	protected final String acceptURI="handler-accept";
 	protected final String publishMessageURI = "message-URI";
 	private int 							nbSubscriber;
@@ -75,10 +74,8 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	
 	protected String BROKER_PUBLICATION_PLUGIN_URI = "broker_publication_URI-" ;
     protected String BROKER_MANAGEMENT_PLUGIN_URI = "broker_management_URI-" ;
-    protected String BROKER_RECEPTION_PLUGIN_URI = "broker_reception_URI-" ;
     private BrokerManagementPlugin bmanagementPlugin;
     private BrokerPublicationPlugin bpublicationPlugin;
-    private BrokerReceptionPlugin breceptionPlugin;
 	private class Couple
 	{
 		String uri;
@@ -118,6 +115,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	protected Broker(String uri,String PublicationInboundPortURI, String ManagementInboundPortURI)throws Exception {
 		
 		super(uri, 0, 1) ;
+		this.addRequiredInterface(ReceptionCI.class);
 		assert	uri != null :
 			new PreconditionException("error uri null") ;
 		assert	PublicationInboundPortURI != null :
@@ -133,7 +131,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		//create plugins
 		this.bmanagementPlugin = new BrokerManagementPlugin();
 		this.bpublicationPlugin= new BrokerPublicationPlugin();
-		this.breceptionPlugin= new BrokerReceptionPlugin();
+		
 		
 		//install them
 		bmanagementPlugin.setPluginURI(this.BROKER_MANAGEMENT_PLUGIN_URI);
@@ -141,9 +139,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		
 		bpublicationPlugin.setPluginURI(this.BROKER_PUBLICATION_PLUGIN_URI);
 		this.installPlugin(bpublicationPlugin);
-		/*toFix
-		breceptionPlugin.setPluginURI(this.BROKER_RECEPTION_PLUGIN_URI);
-		this.installPlugin(breceptionPlugin);*/
+	
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
 		} else {

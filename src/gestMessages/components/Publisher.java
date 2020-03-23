@@ -77,8 +77,8 @@ public class Publisher extends AbstractComponent {
 		 //System.out.println(m);
 		 //destroyTopic("C++");
 		 //publish(m,"C++");
-		 publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++"),"C++");
-		 publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from Java"),"Java");
+		 publish(new Message("Hello world from C++"),"C++");
+		 publish(new Message("Hello world from Java"),"Java");
 		 //publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
 		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from C"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Rust")},"Imperative programming");
 		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from OCaml"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
