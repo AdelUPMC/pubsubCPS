@@ -9,6 +9,7 @@ public class Message implements MessageI {
 	 * 
 	 */
 	private static final long serialVersionUID = -8860020725994791760L;
+	private static final String BASE_URI = "Message-URI-";
 	/**
 	 * 
 	 */
@@ -18,19 +19,30 @@ public class Message implements MessageI {
 	private TimeStamp t;
 	private Properties p;
 	private Serializable content;
+	private static int idMessage = 0;
 	
-	public Message(String uri, TimeStamp t,Properties p,Serializable content ) {
-		this.uri=uri;
+	public Message(TimeStamp t,Properties p,Serializable content ) {
+		synchronized(this)
+		{
+			idMessage ++;
+			this.uri= BASE_URI + idMessage;	
+		}		
 		this.t=t;
 		this.p=p;
 		this.content=content;
 		
 	}
 	
-	//for tests
-	public Message(String uri, Serializable content ) {
-		this.uri = uri;
-		this.content=content;		
+	public Message(Serializable content)
+	{
+		synchronized(this)
+		{
+			idMessage ++;
+			this.uri= BASE_URI + idMessage;	
+		}		
+		this.content=content;
+		this.t = null; // new TimeStamp TODO
+		this.p = new Properties();
 	}
 
 	@Override
