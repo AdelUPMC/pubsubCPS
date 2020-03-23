@@ -190,7 +190,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 			 */
 			if (ri != null)
 			{
-				logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri);
+				logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri.getUri());
 				//if (abonne_uri.hasFiltre() && abonne_uri.getFiltre().filter(m))
 					ri.acceptMessage(m);
 			}
