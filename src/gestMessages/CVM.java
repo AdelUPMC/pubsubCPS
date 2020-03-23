@@ -1,32 +1,16 @@
 package gestMessages;
 
-import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
-import gestMessages.components.Broker;
-import gestMessages.components.Publisher;
-import gestMessages.components.Subscriber;
-import gestMessages.connectors.ManagementConnector;
-import gestMessages.connectors.PublicationConnector;
-import gestMessages.connectors.ReceptionConnector;
-import gestMessages.ports.PublicationOutboundPort;
 
 public class CVM extends AbstractCVM {
 	
 	public static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
-
-	/** URI of the consumer component (convenience).						*/
-	//protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
-	/** URI of the provider component (convenience)**/
-	//protected static final String	SUBSCRIBER_COMPONENT_URI = "my-URI-subscriber" ;
+	public static final long TIME_PROGRAMME = 50000L;
 	/** URI of the provider outbound port (simplifies the connection).	*/
 	protected static final String	PublicationOutboundPortURI = "publication-outboundport" ;
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	PublicationInboundPortURI = "publication-inboundport" ;
 	/** URI of the consumer inbound port (simplifies the connection).		*/
-	//protected static final String	ReceptionOutboundPortURI = "reception-outboundport"; 
-	/** URI of the consumer inbound port (simplifies the connection).		*/
-	//protected static final String	ReceptionInboundPortURI = "reception-inboundport";
-
 	protected static final String	ManagementOutboundPortURIpub = "management-outboundportpub";
 	protected static final String	ManagementOutboundPortURIsub = "management-outboundportsub"; 
 	/** URI of the consumer inbound port (simplifies the connection).		*/
@@ -34,9 +18,6 @@ public class CVM extends AbstractCVM {
 	
 
 	
-	public CVM() throws Exception {
-		super();
-	}
 	protected String	brokerURI ;
 	protected String	publisherURI_01 ;
 	protected String	subscriberURI_01 ;
@@ -50,6 +31,9 @@ public class CVM extends AbstractCVM {
 	protected String publisher_programming_URI ;
 	protected String subscriber_software_developper_URI ;
 	
+	public CVM() throws Exception {
+		super();
+	}
 	
 	
 	@Override
@@ -59,25 +43,13 @@ public class CVM extends AbstractCVM {
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.PUBLIHSING) ;
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.CONNECTING) ;
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.COMPONENT_DEPLOYMENT) ;
-		
-		/**broker component**/
-		//TOEDIT
-	/*	this.brokerURI =
-			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
-					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,ManagementInboundPortURI}) ;
 	
-		assert	this.isDeployedComponent(this.brokerURI) ;
 		
-		this.subscriberURI_01 =ComponentFactory.createSubscriber(ManagementOutboundPortURIsub);				
-		this.publisherURI_01 =ComponentFactory.createPublisher(PublicationOutboundPortURI, ManagementOutboundPortURIpub);
-		
-		this.toggleTracing(this.brokerURI);
-		this.toggleTracing(this.publisherURI_01);
-		this.toggleTracing(this.subscriberURI_01);
-	*/
 		//TestScenario.execute(this, TestScenario.TestCompletTopSub);
 		TestScenario.execute(this, TestScenario.SCENARIO_BASIC1);
-		super.deploy();	
+		
+		
+		super.deploy();
 		assert	this.deploymentDone();
 		}
 
@@ -94,7 +66,6 @@ public class CVM extends AbstractCVM {
 	
 
 	/**
->>>>>>> 9b4051e49f151c3cb65de3dd92a20aad8a903d57
 	 * disconnect the components and then call the base shutdown method.
 	 * 
 	 * <p><strong>Contract</strong></p>
@@ -111,7 +82,6 @@ public class CVM extends AbstractCVM {
 	{
 		assert	this.allFinalised() ;
 		// any disconnection not done yet can be performed here
-
 		//super.shutdown();
 	}
 
@@ -123,7 +93,7 @@ public class CVM extends AbstractCVM {
 			// Execute the application.
 			a.startStandardLifeCycle(2500L) ;
 			// Give some time to see the traces (convenience).
-			Thread.sleep(100000L) ;
+			Thread.sleep(TIME_PROGRAMME) ;
 			// Simplifies the termination (termination has yet to be treated
 			// properly in BCM).
 			System.exit(0) ;

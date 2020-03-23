@@ -7,12 +7,10 @@ import gestMessages.components.Subscriber;
 public class ComponentFactory {
 
 	private static int numberSubsribers = 1;
-	private static int numberPublishers = 1;
 	
 	protected static String createSubscriber(String managementOBPURI, String scenario) throws Exception
 	{
 		String uri = "SUBSCRIBERURI-" + numberSubsribers;
-		//String receptionIBPuri = "SUBRECEPTIONIBPURI" + numberSubsribers;
 		
 		numberSubsribers++;
 		System.out.println("[factory:creatSubscriber]");
@@ -23,10 +21,7 @@ public class ComponentFactory {
 	}
 
 	protected  static String createPublisher(String publicationoutboundPortURI, String managementoutboundPortURI, String scenario) throws Exception
-	{
-		String uri = "PUBLISHERURI-" + numberPublishers;
-		
-		numberPublishers++;
+	{	
 		return 
 				AbstractComponent.createComponent(
 						Publisher.class.getCanonicalName(),

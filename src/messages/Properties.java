@@ -91,7 +91,10 @@ public class Properties implements Serializable {
 	}
 
 	public Integer getIntProp(String name) {
-		return (Integer) this.intprop.get(name);
+		if (this.intprop.get(name) != null)
+			return (Integer) this.intprop.get(name);
+		else
+			return -1;
 	}
 
 	public Long getLongProp(String name) {

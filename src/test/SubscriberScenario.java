@@ -1,7 +1,9 @@
 package test;
 
 import gestMessages.components.Subscriber;
-import gestMessages.plugins.SubscriberReceptionPlugin;
+import messages.MessageFilterI;
+import messages.MessageI;
+import messages.Properties;
 
 public class SubscriberScenario {
 
@@ -11,14 +13,59 @@ public class SubscriberScenario {
 			testCompletTopicSubcribeFirst(sub);
 	}
 	
+	
 	public static void testBasic1(Subscriber sub) throws Exception
 	{
 		if (sub.getSubscriberId() > 1)
 			return;
-		sub.createTopic("Basic");
-		sub.subscribe("Basic", sub.getReceptionPlugin().receptionInboundPortURI);	
+		
+		sub.createTopic("A");
+		sub.createTopic("B");	
+		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
+		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
+		
+		Thread.sleep(2000); // attend un message
+		sub.unsubscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
 	}
 	
+		class FiltreSize implements MessageFilterI{
+		String name;
+		
+		public FiltreSize(String name) {
+			this.name = name;
+					
+		}
+		
+
+		public boolean filter(MessageI m) {
+			Properties p = m.getProperties();
+			Integer res = p.getIntProp("size");
+			
+			return res > 5;
+		}
+	}	
+	
+	public static void testBasic2(Subscriber sub) throws Exception
+	{
+		if (sub.getSubscriberId() > 2)
+			return;
+		MessageFilterI f = new MessageFilterI() {
+			public boolean filter(MessageI m) {
+				Properties p = m.getProperties();
+				Integer res = p.getIntProp("size");
+				return res > 5;
+			}
+		};
+		if (sub.getSubscriberId() == 1)
+		{
+		sub.createTopic("A");
+		sub.createTopic("C");	
+		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
+		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
+		}
+		else
+			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
+	}
 	
 	private static void testCompletTopicSubcribeFirst(Subscriber sub)
 	{
@@ -27,13 +74,13 @@ public class SubscriberScenario {
 		String s3 = "testSubscibe3";
 		String s4 = "testSubscibe4";
 		try {
+			sub.logMessage("[testSubscribe] recupere les topics etant deja creer");
 			String []allOldTopics = sub.getTopics();
-			/*logMessage("[testSubscribe] recupere les topics etant deja creer");
-			logMessage("[testSubscribe] supprimme tous les topics deja existants");
+			sub.logMessage("[testSubscribe] supprimme tous les topics deja existants");
 			for (String string : allOldTopics) {
-				destroyTopic(string);
+				sub.destroyTopic(string);
 			}
-			*/
+			
 			assert !sub.isTopic(s);
 			sub.logMessage("[testSubscribe] detruit topic non existant");
 			sub.destroyTopic(s); 

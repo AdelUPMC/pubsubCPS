@@ -10,11 +10,9 @@ import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import gestMessages.TestScenario;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.PublisherPublicationPlugin;
-import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
 import test.PublisherScenario;
-import test.SubscriberScenario;
 
 
 
@@ -79,7 +77,6 @@ public class Publisher extends AbstractComponent {
 		 * 		-plusieurs messages sur un topic
 		 * 		-plusieurs messages sur plusieurs topics
 		 * **/
-		System.out.println(scenario + "---------------");
 		if (scenario == null)
 		{
 			return;
@@ -89,27 +86,16 @@ public class Publisher extends AbstractComponent {
 		case TestScenario.SCENARIO_BASIC1:
 			PublisherScenario.testBasic1(this);
 			break;
-/*		case TestScenario.SCENARIO_BASIC2:	
-			PublisherScenario.testBasic1(this);
+		case TestScenario.SCENARIO_BASIC2:	
+			PublisherScenario.testBasic2(this);
 			break;
-*/		default:
+		case TestScenario.TestCompletPublisher:
+			PublisherScenario.testCompletPublisher(this);
+			break;
+		default:
 			PublisherScenario.testBasic1(this);
 			break;
 		}
-		
-		/*
-		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
-		 System.out.println("[Publisher:execute] tente de publier");
-		 //MessageI m = new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++");
-		 //System.out.println(m);
-		 //destroyTopic("C++");
-		 //publish(m,"C++");
-		 publish(new Message("Hello world from C++"),"C++");
-		 publish(new Message("Hello world from Java"),"Java");
-		 //publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
-		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from C"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Rust")},"Imperative programming");
-		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from OCaml"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
-		*/
 	}
 	
 	@Override
@@ -120,7 +106,7 @@ public class Publisher extends AbstractComponent {
 	@Override
 	 public void			shutdown()  throws ComponentShutdownException{
 	        this.logMessage("shutdown : component publisher "+Publisher.nbpublishers) ;
-	        super.shutdown();
+	    //    super.shutdown();
 	 }
 	
 	@Override
@@ -136,7 +122,7 @@ public class Publisher extends AbstractComponent {
 	  }
 	 
 	 public void publish(MessageI m, String[] topics) throws Exception {
-		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing message:"+m.getPayload()+ "=> topics="+ topics.toString());
+		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing message:"+m.getPayload()+ "=> "+ topics.length + "topics");
 		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(m,topics);
 	  }
 	 

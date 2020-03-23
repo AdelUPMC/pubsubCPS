@@ -10,7 +10,6 @@ import gestMessages.TestScenario;
 import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
-import gestMessages.ports.ReceptionInboundPortForPlugin;
 import messages.MessageFilterI;
 import messages.MessageI;
 import test.SubscriberScenario;
@@ -79,11 +78,10 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 		case TestScenario.SCENARIO_BASIC1:	
 			SubscriberScenario.testBasic1(this);
 			break;
-		/*case TestScenario.SCENARIO_BASIC2:	
-			SubscriberScenario.testBasic1(this, this.subscriberId);
-			break;*/
+		case TestScenario.SCENARIO_BASIC2:	
+			SubscriberScenario.testBasic2(this);
+			break;
 		case TestScenario.TestCompletTopSub:
-			System.out.println("yesy ");
 			SubscriberScenario.testCompletTopicSubcribe(this);
 			break;
 		default:
@@ -92,62 +90,6 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 		}
 	}
 	
-	/*
-	 * Verifie les fonctions subrcibe, create Topic, destroy topic 
-	 * 
-	 */
-	private 	void		testSubscriber()
-	{
-		String s = "testSubsciber";
-		String s2 = "testSubscibe2";
-		String s3 = "testSubscibe3";
-		String s4 = "testSubscibe4";
-		try {
-			String []allOldTopics = getTopics();
-			/*logMessage("[testSubscribe] recupere les topics etant deja creer");
-			logMessage("[testSubscribe] supprimme tous les topics deja existants");
-			for (String string : allOldTopics) {
-				destroyTopic(string);
-			}
-			*/
-			assert !isTopic(s);
-			logMessage("[testSubscribe] detruit topic non existant");
-			destroyTopic(s); 
-			logMessage("[testSubscribe] crée topic non existant");
-			createTopic(s);
-			logMessage("[testSubscribe] crée topic  existant");
-			createTopic(s);
-			logMessage("[testSubscribe] detruit topic  existant");
-			destroyTopic(s); // assure que ce topic n'existe pas
-			assert !isTopic(s);
-			
-			logMessage("[testSubscribe] abonnement a un topic non existant (doit le creer)");
-			subscribe(s, receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] desabonnement a un topic où il est deja abonner");
-			unsubscribe(s, receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] abonnement a un topic existant");
-			subscribe(s, receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] abonnement a un topic ou il est deja abonner");
-			subscribe(s, receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] desabonnement a un topic où il n'est pas abonner");
-			unsubscribe(s2, receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] desabonnement a un topic où il est abonner");
-			unsubscribe(s, receptionPlugin.receptionInboundPortURI);
-			
-			logMessage("[testSubscribe] creation de 3 topics (dont le premier deja existant)");
-			createTopics(new String[] {s,s2,s3});
-			
-			
-			logMessage("[testSubscribe] abonnement 4 topics dont 1 non existant");
-			subscribe(new String[] {s, s2,s3, s4},receptionPlugin.receptionInboundPortURI);
-			logMessage("[testSubscribe] verification si le 4eme a bien ete creer");
-			assert isTopic(s4);
-			logMessage("[testSubscribe] Tout les test sont terminer");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	@Override
 	 public void			finalise() throws Exception{
@@ -158,7 +100,7 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 	@Override
 	 public void			shutdown()  throws ComponentShutdownException{
 	        this.logMessage("shutdown : component subscriber "+Subscriber.nbsubscribers) ;
-	        super.shutdown();
+	       // super.shutdown();
 	 }
 	
 	@Override
