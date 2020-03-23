@@ -1,5 +1,7 @@
 package gestMessages.components;
 
+import java.util.Arrays;
+
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
@@ -38,7 +40,7 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 		}
 		
 		this.tracer.setTitle("software_developer-"+nbsubscribers);
-		this.tracer.setRelativePosition(nbsubscribers, 2) ;
+		this.tracer.setRelativePosition(nbsubscribers, 3) ;
 		System.out.println("Subscriber crée");
 	}
 
@@ -73,12 +75,12 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 		 * **/
 		
 		System.out.println("[Subscriber:execute] je veux creeer un topic");
-		this.createTopic("C++");
-		this.createTopic("Anas");
+		//this.createTopic("C++");
+		//this.createTopic("Anas");
 		subscribe("C++", receptionPlugin.receptionInboundPortURI);
-		 
-		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
-		 //subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
+		subscribe("Java", receptionPlugin.receptionInboundPortURI);
+		//subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
+		//subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
 
 	}
 
@@ -113,20 +115,25 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 	
 	//ManagementCI
 	 public void subscribe(String topic, String inboundPortURI)throws Exception {
+		 	this.logMessage("Subscriber"+Subscriber.nbsubscribers+" is subscribing to topic "+topic);
 	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, inboundPortURI);
 	  }
 
 	 public void subscribe(String[] topics, String inboundPortURI)throws Exception {
+		 	this.logMessage("Subscriber"+Subscriber.nbsubscribers+" is subscribing to topics: "+Arrays.toString(topics));
 	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topics, inboundPortURI);
 	 }
 	 public void subscribe(String topic, MessageFilterI filter, String inboundPortURI) throws Exception{
+			this.logMessage("Subscriber"+Subscriber.nbsubscribers+" is subscribing to topic "+topic+"with Filter");
 	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic,filter, inboundPortURI);
 	  }
 	 public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortURI) throws Exception{
-	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, newFilter, inboundPortURI);
+		 this.logMessage("Subscriber"+Subscriber.nbsubscribers+" is modifying the filter of the topic "+topic);
+		 ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).subscribe(topic, newFilter, inboundPortURI);
 	  }
 	 public void unsubscribe(String topic, String inboundPortUri) throws Exception {
-	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).unsubscribe(topic, inboundPortUri);
+		 this.logMessage("Subscriber"+Subscriber.nbsubscribers+" is unsubscribing to topic "+topic);
+		 ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).unsubscribe(topic, inboundPortUri);
 	    }
 	 public void createTopic(String topic)throws Exception {
 	        ((PubSubManagementPlugin)this.getPlugin(SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).createTopic(topic);

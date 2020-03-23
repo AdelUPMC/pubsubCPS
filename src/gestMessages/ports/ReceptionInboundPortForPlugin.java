@@ -15,16 +15,15 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 	 * ***/
 	private static final long serialVersionUID = 1L;
 
-	public ReceptionInboundPortForPlugin(String pluginURI, ComponentI owner) throws Exception {
-		super(ReceptionCI.class, pluginURI, owner);
-		assert owner instanceof ReceptionCI;
-	}
-	
 	public ReceptionInboundPortForPlugin(String uri, String pluginURI, ComponentI owner) throws Exception {
 		super(uri, ReceptionCI.class, pluginURI, owner);
 		assert owner instanceof ReceptionCI;
 	}
 
+	public ReceptionInboundPortForPlugin(String pluginURI, ComponentI owner) throws Exception {
+		super(ReceptionCI.class, pluginURI, owner);
+		assert owner instanceof ReceptionCI;
+	}
 	@Override
 	public void acceptMessage(MessageI m) throws Exception {
 		this.getOwner().handleRequestAsync(

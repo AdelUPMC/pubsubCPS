@@ -1,6 +1,8 @@
 package gestMessages.components;
 
 
+import java.util.Arrays;
+
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
@@ -40,7 +42,7 @@ public class Publisher extends AbstractComponent {
 			this.executionLog.setDirectory(System.getProperty("user.home"));
 		}
 		this.tracer.setTitle("Publisher"+nbpublishers);
-		this.tracer.setRelativePosition(nbpublishers, 1) ;
+		this.tracer.setRelativePosition(nbpublishers, 2) ;
 	}
 
 	public void			start() throws ComponentStartException
@@ -71,14 +73,16 @@ public class Publisher extends AbstractComponent {
 		
 		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
 		 System.out.println("[Publisher:execute] tente de publier");
-		 MessageI m = new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++");
-		 System.out.println(m);
+		 //MessageI m = new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++");
+		 //System.out.println(m);
 		 //destroyTopic("C++");
-		 publish(m,"C++");
-		 /*publish(new Message("Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
-		 publish(new Message[] {new Message("Hello world from C"),new Message("Hello world from Rust")},"Imperative programming");
-		 publish(new Message[] {new Message("Hello world from OCaml"),new Message("Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
-	*/	
+		 //publish(m,"C++");
+		 publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++"),"C++");
+		 publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from Java"),"Java");
+		 //publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
+		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from C"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Rust")},"Imperative programming");
+		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from OCaml"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
+		
 	}
 	
 	@Override
@@ -100,22 +104,32 @@ public class Publisher extends AbstractComponent {
 	 
 	//PublicationCI
 	 public void publish(MessageI m, String topic) throws Exception {
-		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing message:"+m.getURI()+ "| topic="+ topic);
+		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing message:"+m.getPayload()+ "=> topic="+ topic);
 		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(m,topic);
 	  }
 	 
 	 public void publish(MessageI m, String[] topics) throws Exception {
-		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing message:"+m.getURI()+ "| topics="+ topics.toString());
+		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing message:"+m.getPayload()+ "=> topics="+ topics.toString());
 		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(m,topics);
 	  }
 	 
 	 public void publish(MessageI[] ms, String topic) throws Exception {
-		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing messages:"+ms.toString()+ "| topic="+topic);
+		 String listeMessages="[";
+		 for(MessageI m: ms) {
+			 listeMessages+=m.getPayload();
+		 }
+		 listeMessages+="]";
+		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing messages:"+listeMessages+"=> topic="+topic);
 		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(ms,topic);
 	 }
 	 
 	 public void publish(MessageI[] ms, String[] topics) throws Exception {
-		 this.logMessage("Publisher"+Publisher.nbpublishers+"is publishing messages:"+ms.toString()+ "| topics="+ topics.toString());
+		 String listeMessages="[";
+		 for(MessageI m: ms) {
+			 listeMessages+=m.getPayload();
+		 }
+		 listeMessages+="]";
+		 this.logMessage("Publisher"+Publisher.nbpublishers+" is publishing messages:"+listeMessages+ "=> topics="+ Arrays.toString(topics));
 		 ((PublisherPublicationPlugin)this.getPlugin(PUBLISHER_PUBLICATION_PLUGIN_URI)).publish(ms,topics);
 	 }
 	 
