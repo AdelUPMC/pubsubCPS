@@ -13,7 +13,7 @@ import gestMessages.ports.PublicationOutboundPort;
 public class CVM extends AbstractCVM {
 	
 	public static final String	BROKER_COMPONENT_URI = "my-URI-broker" ;
-///*<<<<<<< HEAD
+
 	/** URI of the consumer component (convenience).						*/
 	//protected static final String	PUBLISHER_COMPONENT_URI = "my-URI-publisher" ;
 	/** URI of the provider component (convenience)**/
@@ -31,6 +31,8 @@ public class CVM extends AbstractCVM {
 	protected static final String	ManagementOutboundPortURIsub = "management-outboundportsub"; 
 	/** URI of the consumer inbound port (simplifies the connection).		*/
 	protected static final String	ManagementInboundPortURI = "management-inboundport";
+	
+
 	
 	public CVM() throws Exception {
 		super();
@@ -60,7 +62,7 @@ public class CVM extends AbstractCVM {
 		
 		/**broker component**/
 		//TOEDIT
-		this.brokerURI =
+	/*	this.brokerURI =
 			AbstractComponent.createComponent(Broker.class.getCanonicalName(),
 					new Object[]{BROKER_COMPONENT_URI,PublicationInboundPortURI,ManagementInboundPortURI}) ;
 	
@@ -72,8 +74,9 @@ public class CVM extends AbstractCVM {
 		this.toggleTracing(this.brokerURI);
 		this.toggleTracing(this.publisherURI_01);
 		this.toggleTracing(this.subscriberURI_01);
-	
-		
+	*/
+		//TestScenario.execute(this, TestScenario.TestCompletTopSub);
+		TestScenario.execute(this, TestScenario.SCENARIO_BASIC1);
 		super.deploy();	
 		assert	this.deploymentDone();
 		}

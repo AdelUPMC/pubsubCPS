@@ -6,32 +6,42 @@ import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
+import gestMessages.TestScenario;
 import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
+import gestMessages.ports.ReceptionInboundPortForPlugin;
 import messages.MessageFilterI;
 import messages.MessageI;
+import test.SubscriberScenario;
 public class Subscriber extends AbstractComponent implements ReceptionCI {
 
     protected String SUBSCRIBER_MANAGEMENT_PLUGIN_URI = "subscriber_management_URI-" ;
     protected String SUBSCRIBER_RECEPTION_PLUGIN_URI = "subscriber_reception_URI-" ;
+    protected String receptionInboundPortURI = "software_developer_URI-";
+   
+    private final String scenario;
     private PubSubManagementPlugin managementPlugin;
     private SubscriberReceptionPlugin receptionPlugin;
-    protected String receptionInboundPortURI = "software_developer_URI-";
+    
     private static int nbsubscribers = 0;
+    private int subscriberId;
+    
     protected Subscriber(String reflexionURI) throws Exception {
-    	this(reflexionURI, 1,0);
+    	this(reflexionURI, 1,0, null);
     }
     
-	protected Subscriber(String reflectionURI,int nbThreads,int nbSchedulableThreads) throws Exception {
+	protected Subscriber(String reflectionURI,int nbThreads,int nbSchedulableThreads, String scenario) throws Exception {
+		super(reflectionURI + nbsubscribers, nbThreads, nbSchedulableThreads);
 		//1 thread, 0 schedulable thread
-		super(reflectionURI, nbThreads, nbSchedulableThreads);
 		synchronized(this) {
 			nbsubscribers++;
+			subscriberId = nbsubscribers;
 			this.SUBSCRIBER_RECEPTION_PLUGIN_URI = this.SUBSCRIBER_RECEPTION_PLUGIN_URI + nbsubscribers;
 	        this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI = this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI + nbsubscribers;
 	        this.receptionInboundPortURI = this.receptionInboundPortURI + nbsubscribers;
 		}
+		this.scenario = scenario;
 		
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir"));
@@ -50,40 +60,95 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 		this.logMessage("starting component subscriber "+Subscriber.nbsubscribers);
     }
 	
-	/**
-	 * � tester: 3 m�thodes subscribe(), modifyfilter(),unsubscribe(), 2 m�thodes acceptMessage()
-	 * sc�nario: un subscriber va s'abonner en utilisant les 3 m�thodes subscribe
-	 * 	
-	 * **/
+	
 	public void execute() throws Exception{
 		//create plugings
 		this.receptionPlugin = new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
 		this.managementPlugin = new PubSubManagementPlugin();
 		
-		
 		//install them
 		receptionPlugin.setPluginURI(this.SUBSCRIBER_RECEPTION_PLUGIN_URI);
 		managementPlugin.setPluginURI(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI);
-		System.out.println("[Subscriber:execute] je veux creeer un topic");
-		
 		this.installPlugin(managementPlugin);
-		this.installPlugin(receptionPlugin);
-		/**
-		 * � tester: 3 m�thodes subscribe(), modifyfilter(),unsubscribe(), 2 m�thodes acceptMessage()
-		 * sc�nario: un subscriber va s'abonner en utilisant les 3 m�thodes subscribe
-		 * 	
-		 * **/
+		this.installPlugin(receptionPlugin);	
 		
-		System.out.println("[Subscriber:execute] je veux creeer un topic");
-		//this.createTopic("C++");
-		//this.createTopic("Anas");
-		subscribe("C++", receptionPlugin.receptionInboundPortURI);
-		subscribe("Java", receptionPlugin.receptionInboundPortURI);
-		//subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
-		//subscribe(new String[] {"Object-oriented programming", "Java"},receptionPlugin.receptionInboundPortURI);
-
+		if (scenario == null)
+			return;
+		switch (scenario)
+		{
+		case TestScenario.SCENARIO_BASIC1:	
+			SubscriberScenario.testBasic1(this);
+			break;
+		/*case TestScenario.SCENARIO_BASIC2:	
+			SubscriberScenario.testBasic1(this, this.subscriberId);
+			break;*/
+		case TestScenario.TestCompletTopSub:
+			System.out.println("yesy ");
+			SubscriberScenario.testCompletTopicSubcribe(this);
+			break;
+		default:
+			SubscriberScenario.testBasic1(this);
+			break;
+		}
 	}
-
+	
+	/*
+	 * Verifie les fonctions subrcibe, create Topic, destroy topic 
+	 * 
+	 */
+	private 	void		testSubscriber()
+	{
+		String s = "testSubsciber";
+		String s2 = "testSubscibe2";
+		String s3 = "testSubscibe3";
+		String s4 = "testSubscibe4";
+		try {
+			String []allOldTopics = getTopics();
+			/*logMessage("[testSubscribe] recupere les topics etant deja creer");
+			logMessage("[testSubscribe] supprimme tous les topics deja existants");
+			for (String string : allOldTopics) {
+				destroyTopic(string);
+			}
+			*/
+			assert !isTopic(s);
+			logMessage("[testSubscribe] detruit topic non existant");
+			destroyTopic(s); 
+			logMessage("[testSubscribe] crée topic non existant");
+			createTopic(s);
+			logMessage("[testSubscribe] crée topic  existant");
+			createTopic(s);
+			logMessage("[testSubscribe] detruit topic  existant");
+			destroyTopic(s); // assure que ce topic n'existe pas
+			assert !isTopic(s);
+			
+			logMessage("[testSubscribe] abonnement a un topic non existant (doit le creer)");
+			subscribe(s, receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] desabonnement a un topic où il est deja abonner");
+			unsubscribe(s, receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] abonnement a un topic existant");
+			subscribe(s, receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] abonnement a un topic ou il est deja abonner");
+			subscribe(s, receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] desabonnement a un topic où il n'est pas abonner");
+			unsubscribe(s2, receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] desabonnement a un topic où il est abonner");
+			unsubscribe(s, receptionPlugin.receptionInboundPortURI);
+			
+			logMessage("[testSubscribe] creation de 3 topics (dont le premier deja existant)");
+			createTopics(new String[] {s,s2,s3});
+			
+			
+			logMessage("[testSubscribe] abonnement 4 topics dont 1 non existant");
+			subscribe(new String[] {s, s2,s3, s4},receptionPlugin.receptionInboundPortURI);
+			logMessage("[testSubscribe] verification si le 4eme a bien ete creer");
+			assert isTopic(s4);
+			logMessage("[testSubscribe] Tout les test sont terminer");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	 public void			finalise() throws Exception{
 	        this.logMessage("finalising component subscriber "+Subscriber.nbsubscribers) ;
@@ -157,18 +222,13 @@ public class Subscriber extends AbstractComponent implements ReceptionCI {
 	        return ((PubSubManagementPlugin)this.getPlugin(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI)).getPublicationPortURI();
 	  }
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
+	 public SubscriberReceptionPlugin getReceptionPlugin()
+	 {
+		 return receptionPlugin;
+	 }
+	 
+	 public int getSubscriberId()
+	 {
+		 return this.subscriberId;
+	 }
 }

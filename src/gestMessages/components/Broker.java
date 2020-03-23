@@ -349,8 +349,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	
 	public String[] getTopics()throws Exception{
-		return (String[])allTopics.toArray();
-	}
+		return (String[])allTopics.toArray(new String[allTopics.size()]);	}
 	
 	
 	@Override

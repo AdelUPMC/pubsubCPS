@@ -7,11 +7,14 @@ import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
+import gestMessages.TestScenario;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.PublisherPublicationPlugin;
 import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
+import test.PublisherScenario;
+import test.SubscriberScenario;
 
 
 
@@ -21,21 +24,27 @@ public class Publisher extends AbstractComponent {
     private PubSubManagementPlugin managementPlugin;
     private PublisherPublicationPlugin publicationPlugin;
     private static int nbpublishers = 0;
-   
-    protected Publisher() throws Exception {
-    	//1 thread, 0 schedulable thread
-        this(1, 0);
-    }
     
-	protected Publisher(int nbThreads,int nbSchedulableThreads) throws Exception {
+    private String scenario;
+    private final int publisherId;
+
+    protected Publisher() throws Exception {
+    	this(null);
+    }
+    protected Publisher(String scenario) throws Exception {
+    	//1 thread, 0 schedulable thread
+        this(1, 0, scenario);
+    }
+	protected Publisher(int nbThreads,int nbSchedulableThreads, String scenario) throws Exception {
 		//1 thread, 0 schedulable thread
 		super(nbThreads, nbSchedulableThreads) ;
 		synchronized(this) {
 			nbpublishers++;
+			publisherId = nbpublishers;
 			this.PUBLISHER_PUBLICATION_PLUGIN_URI = this.PUBLISHER_PUBLICATION_PLUGIN_URI + nbpublishers;
 	        this.PUBLISHER_MANAGEMENT_PLUGIN_URI = this.PUBLISHER_MANAGEMENT_PLUGIN_URI + nbpublishers;
 		}
-		
+		this.scenario = scenario;
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir"));
 		} else {
@@ -70,7 +79,25 @@ public class Publisher extends AbstractComponent {
 		 * 		-plusieurs messages sur un topic
 		 * 		-plusieurs messages sur plusieurs topics
 		 * **/
+		System.out.println(scenario + "---------------");
+		if (scenario == null)
+		{
+			return;
+		}
+		switch (scenario)
+		{
+		case TestScenario.SCENARIO_BASIC1:
+			PublisherScenario.testBasic1(this);
+			break;
+/*		case TestScenario.SCENARIO_BASIC2:	
+			PublisherScenario.testBasic1(this);
+			break;
+*/		default:
+			PublisherScenario.testBasic1(this);
+			break;
+		}
 		
+		/*
 		 Thread.sleep(150);// we need subscribers to subscribe before to test acceptMessage
 		 System.out.println("[Publisher:execute] tente de publier");
 		 //MessageI m = new Message(PUBLISHER_PUBLICATION_PLUGIN_URI, "Hello world from C++");
@@ -82,7 +109,7 @@ public class Publisher extends AbstractComponent {
 		 //publish(new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Java"),new String[]{"Object-oriented programming", "Java"});
 		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from C"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Rust")},"Imperative programming");
 		 //publish(new Message[] {new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from OCaml"),new Message(PUBLISHER_PUBLICATION_PLUGIN_URI,"Hello world from Haskell")},new String[]{"Functional programming", "OCaml","Haskell"});
-		
+		*/
 	}
 	
 	@Override
@@ -174,6 +201,9 @@ public class Publisher extends AbstractComponent {
 	  }
 	 
 	 
-	 
+	 public int getPublisherId()
+	 {
+		 return this.publisherId;
+	 }
 	
 }

@@ -9,7 +9,7 @@ public class ComponentFactory {
 	private static int numberSubsribers = 1;
 	private static int numberPublishers = 1;
 	
-	protected static String createSubscriber(String managementOBPURI) throws Exception
+	protected static String createSubscriber(String managementOBPURI, String scenario) throws Exception
 	{
 		String uri = "SUBSCRIBERURI-" + numberSubsribers;
 		//String receptionIBPuri = "SUBRECEPTIONIBPURI" + numberSubsribers;
@@ -19,10 +19,10 @@ public class ComponentFactory {
 		return 
 				AbstractComponent.createComponent(
 						Subscriber.class.getCanonicalName(),
-						new Object[]{uri,1,1});//receptionIBPuri,managementOBPURI});	
+						new Object[]{uri,1,0, scenario});	
 	}
 
-	protected  static String createPublisher(String publicationoutboundPortURI, String managementoutboundPortURI) throws Exception
+	protected  static String createPublisher(String publicationoutboundPortURI, String managementoutboundPortURI, String scenario) throws Exception
 	{
 		String uri = "PUBLISHERURI-" + numberPublishers;
 		
@@ -30,7 +30,7 @@ public class ComponentFactory {
 		return 
 				AbstractComponent.createComponent(
 						Publisher.class.getCanonicalName(),
-						new Object[]{1,1});//uri,publicationoutboundPortURI, managementoutboundPortURI});	
+						new Object[]{1,0, scenario});	
 	}
 
 }
