@@ -49,7 +49,7 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	 * 	-MessageFilterI: MessageFilterI associe	
 	 * 
 	 * Map<String,ReceptionOutboundPort> subsobp: 
-	 * 	-String: uri du subscriber
+	 * 	-String: uri de l'inbound port du  subscriber
 	 * 	-ReceptionOutboundPort: outboundport  du subscriber pour la reception	
 	 * 
 	 * Map<ReceptionOutboundPort,ArrayList<MessageI>> published: 
