@@ -53,4 +53,8 @@ public class BrokerPublicationPlugin extends AbstractPlugin implements Publicati
     	((PublicationCI)this.owner).publish(ms, topics);
     }
 
+    public PublicationInboundPortForPlugin getPublicationInboundPort() {
+        return pibp;
+    }
+
 }

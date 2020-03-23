@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.ComponentState;
 import fr.sorbonne_u.components.ComponentStateI;
@@ -21,15 +22,17 @@ import gestMessages.connectors.ReceptionConnector;
 import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.PublicationCI;
 import gestMessages.interfaces.ReceptionCI;
+import gestMessages.plugins.BrokerManagementPlugin;
+import gestMessages.plugins.BrokerPublicationPlugin;
+import gestMessages.plugins.BrokerReceptionPlugin;
+import gestMessages.plugins.PubSubManagementPlugin;
+import gestMessages.plugins.PublisherPublicationPlugin;
 import gestMessages.ports.ManagementInboundPort;
 import gestMessages.ports.PublicationInboundPort;
 import gestMessages.ports.ReceptionOutboundPort;
 import messages.MessageFilterI;
 import messages.MessageI;
 
-
-@RequiredInterfaces(required = {ReceptionCI.class})
-@OfferedInterfaces(offered = {PublicationCI.class,ManagementCI.class})
 public class Broker extends AbstractComponent implements ManagementCI,PublicationCI{
 
 	/**
@@ -69,8 +72,13 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	private Map<String,ReceptionOutboundPort> subsobp;
 	private Map<ReceptionOutboundPort,ArrayList<MessageI>> published;
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
 	
+	protected String BROKER_PUBLICATION_PLUGIN_URI = "broker_publication_URI-" ;
+    protected String BROKER_MANAGEMENT_PLUGIN_URI = "broker_management_URI-" ;
+    protected String BROKER_RECEPTION_PLUGIN_URI = "broker_reception_URI-" ;
+    private BrokerManagementPlugin bmanagementPlugin;
+    private BrokerPublicationPlugin bpublicationPlugin;
+    private BrokerReceptionPlugin breceptionPlugin;
 	private class Couple
 	{
 		String uri;
@@ -122,12 +130,20 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		this.published= new HashMap<>();
 		this.allTopics = new ArrayList<>();
 		
-		//Inbound port pour PublicationCI
-		PublicationInboundPort pip = new PublicationInboundPort(PublicationInboundPortURI, this) ;
-		pip.publishPort();
-		ManagementInboundPort mip= new ManagementInboundPort(ManagementInboundPortURI,this);
-		mip.publishPort();
+		//create plugins
+		this.bmanagementPlugin = new BrokerManagementPlugin();
+		this.bpublicationPlugin= new BrokerPublicationPlugin();
+		this.breceptionPlugin= new BrokerReceptionPlugin();
 		
+		//install them
+		bmanagementPlugin.setPluginURI(this.BROKER_MANAGEMENT_PLUGIN_URI);
+		this.installPlugin(bmanagementPlugin);
+		
+		bpublicationPlugin.setPluginURI(this.BROKER_PUBLICATION_PLUGIN_URI);
+		this.installPlugin(bpublicationPlugin);
+		/*toFix
+		breceptionPlugin.setPluginURI(this.BROKER_RECEPTION_PLUGIN_URI);
+		this.installPlugin(breceptionPlugin);*/
 		if (AbstractCVM.isDistributed) {
 			this.executionLog.setDirectory(System.getProperty("user.dir")) ;
 		} else {
@@ -135,26 +151,6 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 		}
 		this.tracer.setTitle("broker") ;
 		this.tracer.setRelativePosition(1, 1) ;
-		Broker.checkInvariant(this);
-		
-		/*verifications*/
-		assert	this.isPortExisting(PublicationInboundPortURI) :
-					new PostconditionException("port "+PublicationInboundPortURI+" doesn't exist") ;
-		assert	this.isPortExisting(ManagementInboundPortURI) :
-			new PostconditionException("port "+ManagementInboundPortURI+" doesn't exist") ;
-		
-		assert	this.findPortFromURI(PublicationInboundPortURI).
-					getImplementedInterface().equals(PublicationCI.class) :
-					new PostconditionException("PublicationInboundPort has to implement PublicationCI") ;
-		assert	this.findPortFromURI(PublicationInboundPortURI).isPublished() :
-					new PostconditionException("PublicationInboundPortURI is not published") ;
-
-		assert	this.findPortFromURI(ManagementInboundPortURI).
-					getImplementedInterface().equals(ManagementCI.class) :
-					new PostconditionException("ManagementInboundPortURI has to implement ManagementCI") ;
-		assert	this.findPortFromURI(ManagementInboundPortURI).isPublished() :
-					new PostconditionException("ManagementInboundPortURI is not published") ;
-		
 	}
 	
 
@@ -361,18 +357,16 @@ public class Broker extends AbstractComponent implements ManagementCI,Publicatio
 	}
 	
 	
-	/*@Override
+	@Override
 	public void				finalise() throws Exception
 	{
-		
-		for (String uriReception: subsobp.keySet()) {
-			this.doPortDisconnection(uriReception);			
-		}
-	}*/
+		this.logMessage("finalising broker component.") ;
+		 super.finalise();
+	}
 
 	@Override
 	public String getPublicationPortURI() throws Exception {
-		return null;
+		return this.bpublicationPlugin.getPublicationInboundPort().getPortURI();
 	}
 
 }
