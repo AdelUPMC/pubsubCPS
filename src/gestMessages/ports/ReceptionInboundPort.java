@@ -1,6 +1,6 @@
 package gestMessages.ports;
 
-import fr.sorbonne_u.components.AbstractComponent;
+
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractInboundPort;
 import gestMessages.components.Subscriber;
@@ -28,32 +28,25 @@ public class ReceptionInboundPort extends AbstractInboundPort implements Recepti
 
 	@Override
 	public void acceptMessage(MessageI m) throws Exception {
-		//((Subscriber)this.getOwner()).acceptMessage(m);
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Subscriber)this.getServiceOwner()).acceptMessage(m);
-						return null;
-						
-					}
-				});
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((Subscriber)this.getOwner()).acceptMessage(m);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 		
 	}
 
 	@Override
 	public void acceptMessages(MessageI[] ms)throws Exception {
-		//((Subscriber)this.getOwner()).acceptMessages(ms);
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Subscriber)this.getServiceOwner()).acceptMessages(ms);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((Subscriber)this.getOwner()).acceptMessages(ms);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 }

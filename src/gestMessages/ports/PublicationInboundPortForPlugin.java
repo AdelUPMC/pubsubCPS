@@ -1,6 +1,5 @@
 package gestMessages.ports;
 
-import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.PublicationCI;
@@ -25,51 +24,47 @@ public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugi
 
 	@Override
 	public void publish(MessageI m, String topic) throws Exception {
-		this.getOwner().handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-					@Override
-					public Void call() throws Exception {
-						((BrokerPublicationPlugin)this.getServiceProviderReference()).publish(m, topic);
-						return null;
-					}
-					
-				});
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((BrokerPublicationPlugin)this.getOwner()).publish(m, topic);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
+
 	}
 
 	@Override
 	public void publish(MessageI m, String[] topics) throws Exception {
-		this.getOwner().handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-					@Override
-					public Void call() throws Exception {
-						((BrokerPublicationPlugin)this.getServiceProviderReference()).publish(m, topics);
-						return null;
-					}
-				});
-	}
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((BrokerPublicationPlugin)this.getOwner()).publish(m, topics);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });	}
 
 	@Override
 	public void publish(MessageI[] ms, String topic) throws Exception {
-		this.getOwner().handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-					@Override
-					public Void call() throws Exception {
-						((BrokerPublicationPlugin)this.getServiceProviderReference()).publish(ms, topic);
-						return null;
-					}
-				});
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((BrokerPublicationPlugin)this.getOwner()).publish(ms, topic);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void publish(MessageI[] ms, String[] topics) throws Exception {
-		this.getOwner().handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-					@Override
-					public Void call() throws Exception {
-						((BrokerPublicationPlugin)this.getServiceProviderReference()).publish(ms, topics);
-						return null;
-					}
-				});
+
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((BrokerPublicationPlugin)this.getOwner()).publish(ms, topics);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 }

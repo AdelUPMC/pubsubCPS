@@ -27,112 +27,94 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	
 
 	@Override
-	public void subscribe(String topic, String inboundPortUri) throws Exception {
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).subscribe(topic, inboundPortUri);
-						return null;
-						
-					}
-				});
+	public void subscribe(String topic, String inboundPortUri) throws Exception
+	{
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((Broker)this.getOwner()).subscribe(topic, inboundPortUri);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void subscribe(String[] topics, String inboundPortUri) throws Exception{
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).subscribe(topics, inboundPortUri);
-						return null;
-						
-					}
-				});
+		this.owner.runTask((ignore) -> { 
+	        try {	        	
+	        	((Broker)this.getOwner()).subscribe(topics, inboundPortUri);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void subscribe(String topic, MessageFilterI filter, String inboundPortUri) throws Exception{
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).subscribe(topic,filter,inboundPortUri);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {	        	
+	        	((Broker)this.getOwner()).subscribe(topic,filter,inboundPortUri);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortUri) throws Exception{
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).modifyFilter(topic,newFilter,inboundPortUri);
-						return null;
-						
-					}
-				});
+		this.owner.runTask((ignore) -> { 
+	        try {	        	
+	        	((Broker)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void unsubscribe(String topic, String inboundPortUri) throws Exception{
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).unsubscribe(topic, inboundPortUri);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	
+	        	((Broker)this.getOwner()).unsubscribe(topic, inboundPortUri);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void createTopic(String topic) throws Exception{
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).createTopic(topic);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	
+	        	((Broker)this.getOwner()).createTopic(topic);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void createTopics(String[] topics) throws Exception {
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).createTopics(topics);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((Broker)this.getOwner()).createTopics(topics);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });		
 	}
 
 	@Override
 	public void destroyTopic(String topic) throws Exception {
-		this.owner.handleRequestAsync(
-				new AbstractComponent.AbstractService<Void>() {
-					@Override
-					public Void call() throws Exception {
-						((Broker)this.getServiceOwner()).destroyTopic(topic);
-						return null;
-						
-					}
-				});
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((Broker)this.getOwner()).destroyTopic(topic);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override

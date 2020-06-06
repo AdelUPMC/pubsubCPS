@@ -1,6 +1,5 @@
 package gestMessages.ports;
 
-import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.ReceptionCI;
@@ -24,31 +23,27 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 		super(ReceptionCI.class, pluginURI, owner);
 		assert owner instanceof ReceptionCI;
 	}
+
 	@Override
 	public void acceptMessage(MessageI m) throws Exception {
-		this.getOwner().handleRequestAsync(
-                new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-                    @Override
-                    public Void call() throws Exception {
-                        ((SubscriberReceptionPlugin) this.getServiceProviderReference()).acceptMessage(m);
-                        return null;
-                    }
-                });
-		
+		this.owner.runTask((ignore) -> { 
+	        try {
+	        	((SubscriberReceptionPlugin) this.getOwner()).acceptMessage(m);
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 	}
 
 	@Override
 	public void acceptMessages(MessageI[] ms) throws Exception {
-		 this.getOwner().handleRequestAsync(
-	                new AbstractComponent.AbstractService<Void>(this.pluginURI) {
-	                    @Override
-	                    public Void call() throws Exception {
-	                        ((SubscriberReceptionPlugin) this.getServiceProviderReference()).acceptMessages(ms);
-	                        return null;
-	                    }
-	                });
+		 this.owner.runTask((ignore) -> { 
+		        try {
+		        	((SubscriberReceptionPlugin) this.getOwner()).acceptMessages(ms);
+		        } catch (Exception e) {	
+		            e.printStackTrace();
+		        }
+		    });
 		
 	}
-	
-	
 }
