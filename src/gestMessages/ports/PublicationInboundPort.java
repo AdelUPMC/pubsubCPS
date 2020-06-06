@@ -2,8 +2,8 @@ package gestMessages.ports;
 
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractInboundPort;
-import gestMessages.components.Broker;
 import gestMessages.interfaces.PublicationCI;
+import gestMessages.interfaces.PublicationsImplementationI;
 import messages.MessageI;
 
 public class PublicationInboundPort extends AbstractInboundPort implements PublicationCI {
@@ -27,7 +27,7 @@ public class PublicationInboundPort extends AbstractInboundPort implements Publi
 	public void publish(MessageI m, String topic) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).publish(m, 
+	        	((PublicationsImplementationI)this.getOwner()).publish(m, 
 	        			topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
@@ -39,7 +39,7 @@ public class PublicationInboundPort extends AbstractInboundPort implements Publi
 	public void publish(MessageI m, String[] topics) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).publish(m, topics);
+	        	((PublicationsImplementationI)this.getOwner()).publish(m, topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -51,7 +51,7 @@ public class PublicationInboundPort extends AbstractInboundPort implements Publi
 	public void publish(MessageI[] ms, String topic) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).publish(ms, topic);	        
+	        	((PublicationsImplementationI)this.getOwner()).publish(ms, topic);	        
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -63,7 +63,7 @@ public class PublicationInboundPort extends AbstractInboundPort implements Publi
 	public void publish(MessageI[] ms, String[] topics) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).publish(ms, topics);
+	        	((PublicationsImplementationI)this.getOwner()).publish(ms, topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }

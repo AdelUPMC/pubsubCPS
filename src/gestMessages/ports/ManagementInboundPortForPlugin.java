@@ -5,7 +5,8 @@ import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.ManagementCI;
 import messages.MessageFilterI;
-import gestMessages.plugins.BrokerManagementPlugin;;
+import gestMessages.interfaces.SubscriptionImplementationI;
+import gestMessages.interfaces.ManagementImplementationI;
 
 /***
  * extends the standard ManagementInboundPort for the case where 
@@ -31,8 +32,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-//	        	((BrokerManagementPlugin)this.getServiceProviderReference()).subscribe(topic,inboundPortUri);
-	        	((BrokerManagementPlugin)this.getOwner()).subscribe(topic,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topic,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -45,7 +45,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).subscribe(topics,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topics,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -57,7 +57,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 		this.owner.runTask((ignore) -> { 
 	        try {
 	        	
-	        	((BrokerManagementPlugin)this.getOwner()).subscribe(topic,newFilter,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topic,newFilter,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -70,7 +70,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -82,7 +82,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).unsubscribe(topic,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).unsubscribe(topic,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -95,7 +95,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).createTopic(topic);
+	        	((ManagementImplementationI)this.getOwner()).createTopic(topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -107,7 +107,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	public void createTopics(String[] topics) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).createTopics(topics);
+	        	((ManagementImplementationI)this.getOwner()).createTopics(topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -120,7 +120,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerManagementPlugin)this.getOwner()).destroyTopic(topic);
+	        	((ManagementImplementationI)this.getOwner()).destroyTopic(topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -134,7 +134,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
                 new AbstractComponent.AbstractService<Boolean>(this.pluginURI) {
                     @Override
                     public Boolean call() throws Exception {
-                        return ((BrokerManagementPlugin)this.getServiceProviderReference()).isTopic(topic);
+                        return ((ManagementImplementationI)this.getServiceProviderReference()).isTopic(topic);
                     }
                 }) ;
 	}
@@ -145,7 +145,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
                 new AbstractComponent.AbstractService<String[]>(this.pluginURI) {
                     @Override
                     public String[] call() throws Exception {
-                        return ((BrokerManagementPlugin)this.getServiceProviderReference()).getTopics();
+                        return ((ManagementImplementationI)this.getServiceProviderReference()).getTopics();
                     }
                 }) ;
 	}
@@ -156,7 +156,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
                 new AbstractComponent.AbstractService<String>(this.pluginURI) {
                     @Override
                     public String call() throws Exception {
-                        return ((BrokerManagementPlugin)this.getServiceProviderReference()).getPublicationPortURI();
+                        return ((ManagementImplementationI)this.getServiceProviderReference()).getPublicationPortURI();
                     }
                 }) ;
 	}

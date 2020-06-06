@@ -3,8 +3,8 @@ package gestMessages.ports;
 
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractInboundPort;
-import gestMessages.components.Subscriber;
 import gestMessages.interfaces.ReceptionCI;
+import gestMessages.interfaces.ReceptionImplementationI;
 import messages.MessageI;
 
 public class ReceptionInboundPort extends AbstractInboundPort implements ReceptionCI{
@@ -30,7 +30,7 @@ public class ReceptionInboundPort extends AbstractInboundPort implements Recepti
 	public void acceptMessage(MessageI m) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Subscriber)this.getOwner()).acceptMessage(m);
+	        	((ReceptionImplementationI)this.getOwner()).acceptMessage(m);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -42,7 +42,7 @@ public class ReceptionInboundPort extends AbstractInboundPort implements Recepti
 	public void acceptMessages(MessageI[] ms)throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Subscriber)this.getOwner()).acceptMessages(ms);
+	        	((ReceptionImplementationI)this.getOwner()).acceptMessages(ms);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }

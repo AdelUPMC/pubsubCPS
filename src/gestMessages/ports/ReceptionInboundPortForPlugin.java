@@ -3,7 +3,7 @@ package gestMessages.ports;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.ReceptionCI;
-import gestMessages.plugins.SubscriberReceptionPlugin;
+import gestMessages.interfaces.ReceptionImplementationI;
 import messages.MessageI;
 
 public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin implements ReceptionCI {
@@ -28,7 +28,7 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 	public void acceptMessage(MessageI m) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((SubscriberReceptionPlugin) this.getOwner()).acceptMessage(m);
+	        	((ReceptionImplementationI) this.getOwner()).acceptMessage(m);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -39,7 +39,7 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 	public void acceptMessages(MessageI[] ms) throws Exception {
 		 this.owner.runTask((ignore) -> { 
 		        try {
-		        	((SubscriberReceptionPlugin) this.getOwner()).acceptMessages(ms);
+		        	((ReceptionImplementationI) this.getOwner()).acceptMessages(ms);
 		        } catch (Exception e) {	
 		            e.printStackTrace();
 		        }

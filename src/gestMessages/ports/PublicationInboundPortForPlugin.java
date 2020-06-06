@@ -3,7 +3,7 @@ package gestMessages.ports;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.PublicationCI;
-import gestMessages.plugins.BrokerPublicationPlugin;
+import gestMessages.interfaces.PublicationsImplementationI;
 import messages.MessageI;
 
 public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugin implements PublicationCI {
@@ -26,7 +26,7 @@ public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugi
 	public void publish(MessageI m, String topic) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerPublicationPlugin)this.getOwner()).publish(m, topic);
+	        	((PublicationsImplementationI)this.getOwner()).publish(m, topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -38,7 +38,7 @@ public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugi
 	public void publish(MessageI m, String[] topics) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerPublicationPlugin)this.getOwner()).publish(m, topics);
+	        	((PublicationsImplementationI)this.getOwner()).publish(m, topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -48,7 +48,7 @@ public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugi
 	public void publish(MessageI[] ms, String topic) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerPublicationPlugin)this.getOwner()).publish(ms, topic);
+	        	((PublicationsImplementationI)this.getOwner()).publish(ms, topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -60,7 +60,7 @@ public class PublicationInboundPortForPlugin extends AbstractInboundPortForPlugi
 
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((BrokerPublicationPlugin)this.getOwner()).publish(ms, topics);
+	        	((PublicationsImplementationI)this.getOwner()).publish(ms, topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }

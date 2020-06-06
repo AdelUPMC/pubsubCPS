@@ -3,8 +3,9 @@ package gestMessages.ports;
 import fr.sorbonne_u.components.AbstractComponent;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractInboundPort;
-import gestMessages.components.Broker;
 import gestMessages.interfaces.ManagementCI;
+import gestMessages.interfaces.SubscriptionImplementationI;
+import gestMessages.interfaces.ManagementImplementationI;
 import messages.MessageFilterI;
 
 public class ManagementInboundPort extends AbstractInboundPort implements ManagementCI {
@@ -31,7 +32,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	{
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).subscribe(topic, inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topic, inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -42,7 +43,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	public void subscribe(String[] topics, String inboundPortUri) throws Exception{
 		this.owner.runTask((ignore) -> { 
 	        try {	        	
-	        	((Broker)this.getOwner()).subscribe(topics, inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topics, inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -53,7 +54,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	public void subscribe(String topic, MessageFilterI filter, String inboundPortUri) throws Exception{
 		this.owner.runTask((ignore) -> { 
 	        try {	        	
-	        	((Broker)this.getOwner()).subscribe(topic,filter,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).subscribe(topic,filter,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -64,7 +65,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	public void modifyFilter(String topic, MessageFilterI newFilter, String inboundPortUri) throws Exception{
 		this.owner.runTask((ignore) -> { 
 	        try {	        	
-	        	((Broker)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).modifyFilter(topic,newFilter,inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -76,7 +77,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 		this.owner.runTask((ignore) -> { 
 	        try {
 	        	
-	        	((Broker)this.getOwner()).unsubscribe(topic, inboundPortUri);
+	        	((SubscriptionImplementationI)this.getOwner()).unsubscribe(topic, inboundPortUri);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -88,7 +89,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 		this.owner.runTask((ignore) -> { 
 	        try {
 	        	
-	        	((Broker)this.getOwner()).createTopic(topic);
+	        	((ManagementImplementationI)this.getOwner()).createTopic(topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -99,7 +100,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	public void createTopics(String[] topics) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).createTopics(topics);
+	        	((ManagementImplementationI)this.getOwner()).createTopics(topics);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -110,7 +111,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 	public void destroyTopic(String topic) throws Exception {
 		this.owner.runTask((ignore) -> { 
 	        try {
-	        	((Broker)this.getOwner()).destroyTopic(topic);
+	        	((ManagementImplementationI)this.getOwner()).destroyTopic(topic);
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
@@ -123,7 +124,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 				new AbstractComponent.AbstractService<Boolean>(){
 					@Override
 					public Boolean call() throws Exception {
-						return ((Broker)this.getServiceOwner()).isTopic(topic);
+						return ((ManagementImplementationI)this.getServiceOwner()).isTopic(topic);
 					}
 			});
 	}
@@ -134,7 +135,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 				new AbstractComponent.AbstractService<String[]>() {
 					@Override
 					public String[] call() throws Exception {
-						return ((Broker)this.getServiceOwner()).getTopics();
+						return ((ManagementImplementationI)this.getServiceOwner()).getTopics();
 						
 					}
 				});
@@ -146,7 +147,7 @@ public class ManagementInboundPort extends AbstractInboundPort implements Manage
 				new AbstractComponent.AbstractService<String>() {
 					@Override
 					public String call() throws Exception {
-						return ((Broker)this.getServiceOwner()).getPublicationPortURI();
+						return ((ManagementImplementationI)this.getServiceOwner()).getPublicationPortURI();
 						
 					}
 				});
