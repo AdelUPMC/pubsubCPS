@@ -26,7 +26,7 @@ public class ManagementInboundPortForPlugin extends AbstractInboundPortForPlugin
 	public ManagementInboundPortForPlugin(String pluginURI, ComponentI owner) throws Exception {
 		super(ManagementCI.class, pluginURI, owner);
 	}
-
+	
 	@Override
 	public void subscribe(String topic, String inboundPortUri) throws Exception {
 		this.getOwner().handleRequestAsync(
