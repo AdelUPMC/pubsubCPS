@@ -11,7 +11,9 @@ import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
 import gestMessages.connectors.ReceptionConnector;
 import gestMessages.interfaces.ManagementCI;
+import gestMessages.interfaces.ManagementImplementationI;
 import gestMessages.interfaces.PublicationCI;
+import gestMessages.interfaces.PublicationsImplementationI;
 import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.BrokerManagementPlugin;
 import gestMessages.plugins.BrokerPublicationPlugin;
@@ -19,7 +21,7 @@ import gestMessages.ports.ReceptionOutboundPort;
 import messages.MessageFilterI;
 import messages.MessageI;
 
-public class Broker extends AbstractComponent implements ManagementCI,PublicationCI{
+public class Broker extends AbstractComponent implements ManagementImplementationI,PublicationsImplementationI{
 
 	/**
 	 * <String,ArrayList<MessageI>> messages: 

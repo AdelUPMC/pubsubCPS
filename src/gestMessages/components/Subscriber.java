@@ -7,13 +7,13 @@ import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import gestMessages.TestScenario;
-import gestMessages.interfaces.ReceptionCI;
+import gestMessages.interfaces.ReceptionImplementationI;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
 import messages.MessageFilterI;
 import messages.MessageI;
 import test.SubscriberScenario;
-public class Subscriber extends AbstractComponent implements ReceptionCI {
+public class Subscriber extends AbstractComponent implements ReceptionImplementationI {
 
     protected String SUBSCRIBER_MANAGEMENT_PLUGIN_URI = "subscriber_management_URI-" ;
     protected String SUBSCRIBER_RECEPTION_PLUGIN_URI = "subscriber_reception_URI-" ;
