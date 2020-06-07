@@ -1,6 +1,7 @@
 package test;
 
 
+import exceptions.InexistentPropertyException;
 import gestMessages.components.Subscriber;
 import messages.MessageFilterI;
 import messages.MessageI;
@@ -8,7 +9,7 @@ import messages.Properties;
 
 public class SubscriberScenario {
 
-	private static final int SIZECHAOS = 10;
+	private static final int SIZECHAOS = 10000;
 
 	public static void testCompletTopicSubcribe(Subscriber sub)
 	{
@@ -27,7 +28,7 @@ public class SubscriberScenario {
 		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
 		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
 		
-		Thread.sleep(2000); // attend un message
+		Thread.sleep(10); // attend un message
 		sub.unsubscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
 	}
 	
@@ -40,9 +41,15 @@ public class SubscriberScenario {
 		}
 		
 
-		public boolean filter(MessageI m) {
+		public boolean filter(MessageI m)  {
 			Properties p = m.getProperties();
-			Integer res = p.getIntProp("size");
+			Integer res = null;
+			try {
+				res = p.getIntProp("size");
+			} catch (InexistentPropertyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			return res > 5;
 		}
@@ -55,7 +62,13 @@ public class SubscriberScenario {
 		MessageFilterI f = new MessageFilterI() {
 			public boolean filter(MessageI m) {
 				Properties p = m.getProperties();
-				Integer res = p.getIntProp("size");
+				Integer res = null;
+				try {
+					res = p.getIntProp("size");
+				} catch (InexistentPropertyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return res > 5;
 			}
 		};
@@ -77,7 +90,13 @@ public class SubscriberScenario {
 		MessageFilterI f = new MessageFilterI() {
 			public boolean filter(MessageI m) {
 				Properties p = m.getProperties();
-				Integer res = p.getIntProp("size");
+				Integer res = null;
+				try {
+					res = p.getIntProp("size");
+				} catch (InexistentPropertyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return res > 5;
 			}
 		};
@@ -131,7 +150,13 @@ public class SubscriberScenario {
 			public boolean filter(MessageI m)
 			{
 				Properties p = m.getProperties();
-				Integer res = p.getIntProp("randInt");
+				Integer res = null;
+				try {
+					res = p.getIntProp("randInt");
+				} catch (InexistentPropertyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return res < (Math.random() * 42) || true;
 			}
 		};
@@ -140,7 +165,13 @@ public class SubscriberScenario {
 			public boolean filter(MessageI m)
 			{
 				Properties p = m.getProperties();
-				Integer res = p.getIntProp("randInt");
+				Integer res = null;
+				try {
+					res = p.getIntProp("randInt");
+				} catch (InexistentPropertyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return res % 2 == 0 || true;
 			}
 		};

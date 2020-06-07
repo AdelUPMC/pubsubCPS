@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import exceptions.InexistentPropertyException;
+
 
 public class Properties implements Serializable {
 	
@@ -70,43 +72,60 @@ public class Properties implements Serializable {
 		this.stringprop.put(name, v);
 	}
 
-	public Boolean getBooleanProp(String name) {
-		return (Boolean) this.boolprop.get(name);
+	public Boolean getBooleanProp(String name) throws InexistentPropertyException {
+		if (this.boolprop.containsKey(name)) 
+			return (Boolean) this.boolprop.get(name);
+		else throw new InexistentPropertyException(name);
+		
 	}
 
-	public Byte getByteProp(String name) {
-		return (Byte) this.byteprop.get(name);
+	public Byte getByteProp(String name) throws InexistentPropertyException {
+		if (this.byteprop.containsKey(name)) 
+			return (Byte) this.byteprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public Character getCharProp(String name) {
-		return (Character) this.charprop.get(name);
+	public Character getCharProp(String name) throws InexistentPropertyException {
+		if (this.charprop.containsKey(name)) 
+			return (Character) this.charprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public Double getDoubleProp(String name) {
-		return (Double) this.doubleprop.get(name);
+	public Double getDoubleProp(String name) throws InexistentPropertyException {
+		if (this.doubleprop.containsKey(name)) 
+			return (Double) this.doubleprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public Float getFloatProp(String name) {
-		return (Float) this.floatprop.get(name);
+	public Float getFloatProp(String name) throws InexistentPropertyException {
+		if (this.floatprop.containsKey(name)) 
+			return (Float) this.floatprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public Integer getIntProp(String name) {
-		if (this.intprop.get(name) != null)
+	public Integer getIntProp(String name) throws InexistentPropertyException {
+		if (this.intprop.containsKey(name)) 
 			return (Integer) this.intprop.get(name);
-		else
-			return -1;
+		else throw new InexistentPropertyException(name);
+	
 	}
 
-	public Long getLongProp(String name) {
-		return (Long) this.longprop.get(name);
+	public Long getLongProp(String name) throws InexistentPropertyException {
+		if (this.longprop.containsKey(name)) 
+			return (Long) this.longprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public Short getShortProp(String name) {
-		return (Short) this.shortprop.get(name);
+	public Short getShortProp(String name) throws InexistentPropertyException {
+		if (this.shortprop.containsKey(name)) 
+			return (Short) this.shortprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 
-	public String getStringProp(String name) {
-		return (String) this.stringprop.get(name);
+	public String getStringProp(String name) throws InexistentPropertyException {
+		if (this.stringprop.containsKey(name)) 
+			return (String) this.stringprop.get(name);
+		else throw new InexistentPropertyException(name);
 	}
 	
 }

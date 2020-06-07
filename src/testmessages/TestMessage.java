@@ -6,6 +6,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import exceptions.InexistentPropertyException;
 import messages.Message;
 import messages.MessageI;
 import messages.Properties;
@@ -67,17 +68,22 @@ class TestMessage {
     
     @Test
     void testgetProperties() {
-    	assertEquals(m1.getProperties().getBooleanProp("Object-Oriented language"),false);
-    	assertEquals(m2.getProperties().getBooleanProp("Object-Oriented language"),true);
-    	assert(m1.getProperties().getIntProp("idLanguage")==1);
-    	assert(m2.getProperties().getIntProp("idLanguage")==2);
+    	try {
+			assertEquals(m1.getProperties().getBooleanProp("Object-Oriented language"),false);
+			assertEquals(m2.getProperties().getBooleanProp("Object-Oriented language"),true);
+	    	assert(m1.getProperties().getIntProp("idLanguage")==1);
+	    	assert(m2.getProperties().getIntProp("idLanguage")==2);
+	    	assertEquals(m1.getProperties().getStringProp("Language"),"OCaml");
+	    	assertEquals(m2.getProperties().getStringProp("Language"),"Java");
+	    	assert(m1.getProperties().getDoubleProp("Users")==0.1);
+	    	assert(m2.getProperties().getDoubleProp("Users")==0.8);
+	     	assert(m1.getProperties().getIntProp("Users")==10000);
+	    	assert(m2.getProperties().getIntProp("Users")==9000000);
+		} catch (InexistentPropertyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	
-    	assertEquals(m1.getProperties().getStringProp("Language"),"OCaml");
-    	assertEquals(m2.getProperties().getStringProp("Language"),"Java");
-    	assert(m1.getProperties().getDoubleProp("Users")==0.1);
-    	assert(m2.getProperties().getDoubleProp("Users")==0.8);
-     	assert(m1.getProperties().getIntProp("Users")==10000);
-    	assert(m2.getProperties().getIntProp("Users")==9000000);
 
     	
     }
