@@ -17,7 +17,6 @@ import gestMessages.interfaces.SubscriptionImplementationI;
 import gestMessages.plugins.BrokerManagementPlugin;
 import gestMessages.plugins.BrokerPublicationPlugin;
 import gestMessages.ports.ReceptionOutboundPort;
-import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
 
@@ -52,6 +51,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	private int 							nbSubscriber;
 	private final int 						BUFFER_MESSAGE = 10;
 	private final long 						BUFFER_TIME = 1000;
+	private final boolean					MODE_DEBUG = false;
 	private Map<String,ArrayList<Couple>> abonnements;
 	private ArrayList<String> allTopics;
 	private Map<String,ReceptionOutboundPort> subsobp;
@@ -172,7 +172,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				synchronized (toSend) {
 					toSend.wait();					
 				}
-			System.out.println("[Broker:FinalSend] je me reveille ");
+			if (MODE_DEBUG) System.out.println("[Broker:FinalSend] je me reveille ");
 			stackLock.writeLock().lock();
 			while(!toSend.isEmpty())
 			{
@@ -181,8 +181,8 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				if (stack.get(sub).size() == 1)
 					ri.acceptMessage(stack.get(sub).get(0));
 				else
-					ri.acceptMessage(stack.get(sub).get(0)); // TODO changer accepteMessage ArrayList
-				stack.get(sub).removeAll(stack.get(sub));
+					ri.acceptMessages(stack.get(sub));
+				stack.put(sub, new ArrayList<MessageI>());
 				hasToUpdate.put(sub, false);
 			}
 			stackLock.writeLock().unlock();
@@ -214,7 +214,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			stackLock.readLock().unlock();
 			if (hasTonotify)
 				synchronized (toSend) {
-					System.out.println("Ca marche");
+					if (MODE_DEBUG) System.out.println("Ca marche");
 					toSend.notify();
 				}
 		
@@ -232,7 +232,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		
 		if (uris != null)
 		{
-			//System.out.println("[Broker:sendpublished] il y'a " + uris.size() + " aboonnes");
+			//if (MODE_DEBUG) System.out.println("[Broker:sendpublished] il y'a " + uris.size() + " aboonnes");
 			for(Couple abonne_uri: uris)
 			{
 				ReceptionOutboundPort ri = subsobp.get(abonne_uri.getUri());
@@ -255,7 +255,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 						{
 							toSend.add(abonne_uri.getUri());
 							synchronized (toSend) {
-								System.out.println("============Notify");
+								if (MODE_DEBUG) System.out.println("============Notify");
 								toSend.notify();							
 							}
 						}
@@ -264,14 +264,14 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				}
 				else
 				{
-					System.out.println("[sendPublished] PROBLEME un abooner n'est pas connecter");
+					if (MODE_DEBUG) System.out.println("[sendPublished] PROBLEME un abooner n'est pas connecter");
 				}
 			}
 		}
 		if (uris == null || uris.isEmpty())
 			{
 			logMessage("[sendpulished] aucun abonner au topic :" + topic);
-			System.out.println("[sendpulished] aucun abonner au topic :" + topic);
+			if (MODE_DEBUG) System.out.println("[sendpulished] aucun abonner au topic :" + topic);
 			}
 		else
 			System.out.println("[Broker:sendpublished] fin " + uris.size() + " for "+ topic);
@@ -346,12 +346,12 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			this.allTopics.remove(topic);
 			this.abonnements.get(topic).clear();
 			this.abonnements.remove(topic);
-			logMessage("[destroyTopic] destroy " + topic);
+			logMessage("[destroyTopic] Broker destroyed topic " + topic);
+			System.out.println("[Broker:destroyTopic] Broker destroyed topic :" + topic);	
 		}
 		else
 			logMessage("[destroyTopic] topic nonexistent");
 		lock.writeLock().unlock();
-		System.out.println("[Broker:destroyTopic] Broker destroyed topic :" + topic);	
 	}
 	
 	/**
@@ -404,7 +404,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			if (couple.getUri().equals(inboundPortUri))
 			{
 				logMessage("[subscribe] " + inboundPortUri + "est deja aboné au topic " + topic );
-				System.out.println("[Broker:subscribe]Vous etes deja abonné");		
+				if (MODE_DEBUG) System.out.println("[Broker:subscribe]Vous etes deja abonné");		
 				lock.readLock().unlock();
 				return;
 			}

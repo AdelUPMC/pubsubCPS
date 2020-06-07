@@ -1,5 +1,7 @@
 package gestMessages.plugins;
 
+import java.util.ArrayList;
+
 import fr.sorbonne_u.components.AbstractPlugin;
 import fr.sorbonne_u.components.ComponentI;
 import gestMessages.interfaces.ReceptionCI;
@@ -57,7 +59,7 @@ public class SubscriberReceptionPlugin extends AbstractPlugin implements Recepti
     }
 
     @Override
-    public void acceptMessages(MessageI[] ms) throws Exception {
+    public void acceptMessages(ArrayList<MessageI> ms) throws Exception {
     	((ReceptionImplementationI)this.owner).acceptMessages(ms);
     }
 

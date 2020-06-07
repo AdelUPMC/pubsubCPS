@@ -1,5 +1,7 @@
 package gestMessages.plugins;
 
+import java.util.ArrayList;
+
 import fr.sorbonne_u.components.AbstractPlugin;
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.reflection.interfaces.ReflectionI;
@@ -64,7 +66,7 @@ public class BrokerReceptionPlugin extends AbstractPlugin {
         this.robp.acceptMessage(m);
     }
 
-    public void acceptMessages(MessageI[] ms) throws Exception {
+    public void acceptMessages(ArrayList<MessageI> ms) throws Exception {
         this.robp.acceptMessages(ms);
     }
 	

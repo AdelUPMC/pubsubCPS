@@ -1,5 +1,6 @@
 package gestMessages.components;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import fr.sorbonne_u.components.AbstractComponent;
@@ -119,15 +120,15 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 	 }
 	
 	//ReceptionCI
-	public void acceptMessage(MessageI m) throws Exception {
-		
+	public void acceptMessage(MessageI m) throws Exception
+	{	
 		System.out.println("[Subsrciber:Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 		this.logMessage("[Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 	}
-	public void acceptMessages(MessageI[] ms) throws Exception
+	public void acceptMessages(ArrayList<MessageI> ms) throws Exception
 	{
-		this.logMessage("[Subscriber:acceptMessages] bloque de " + ms.length + " messages recus" );
-		
+		this.logMessage("[Subscriber:acceptMessages] bloc de " + ms.size() + " messages recus" );
+		System.out.println("[Subscriber:acceptMessages] bloc de " + ms.size() + " messages recus");
 		/*
 		 * for (MessageI m : ms) {
 		 *	acceptMessage(m);

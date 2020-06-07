@@ -1,5 +1,7 @@
 package gestMessages.ports;
 
+import java.util.ArrayList;
+
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.AbstractOutboundPort;
 import gestMessages.interfaces.ReceptionImplementationI;
@@ -30,7 +32,7 @@ public class ReceptionOutboundPort extends AbstractOutboundPort implements Recep
 	}
 
 	@Override
-	public void acceptMessages(MessageI[] ms) throws Exception {
+	public void acceptMessages(ArrayList<MessageI> ms) throws Exception {
 		((ReceptionImplementationI)this.connector).acceptMessages(ms);
 
 	}

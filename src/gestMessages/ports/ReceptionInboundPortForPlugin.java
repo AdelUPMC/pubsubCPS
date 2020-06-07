@@ -1,5 +1,7 @@
 package gestMessages.ports;
 
+import java.util.ArrayList;
+
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
 import gestMessages.interfaces.ReceptionImplementationI;
@@ -35,7 +37,7 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 	}
 
 	@Override
-	public void acceptMessages(MessageI[] ms) throws Exception {
+	public void acceptMessages(ArrayList<MessageI> ms) throws Exception {
 		 this.owner.runTask((ignore) -> { 
 		        try {
 		        	((ReceptionImplementationI) this.getOwner()).acceptMessages(ms);
