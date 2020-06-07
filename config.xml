@@ -1,0 +1,18 @@
+<deployment>
+	<hosts>
+		<host name="localhost"
+			dir="F:\\Programmation\\workspaceCPS2020\\pubsubCPS\\src" />
+	</hosts>
+	<cyclicBarrier hostname="localhost" port="55253" />
+	<globalRegistry hostname="localhost" port="55252" />
+	<rmiRegistryPort no="55999" />
+	<jvms2hostnames>
+		<jvm2hostname jvmuri="JvmBroker1" hostname="localhost"
+			rmiRegistryCreator="true" mainclass="gestMessages.DistributedCVM" />
+		<jvm2hostname jvmuri="JvmBroker2" hostname="localhost"
+			rmiRegistryCreator="false" mainclass="gestMessages.DistributedCVM" />
+		<jvm2hostname jvmuri="jvmReplicateur"
+			rmiRegistryCreator="false" hostname="localhost"
+			mainclass="gestMessages.DistributedCVM" />
+	</jvms2hostnames>
+</deployment>
