@@ -8,7 +8,8 @@ import messages.MessageI;
 
 public class PublisherScenario {
 	
-	private static final int SIZECHAOS = 1000;
+	private static int SIZECHAOS = 10;
+	private static boolean canSleep = false;
 
 	public static void testBasic1(Publisher pub) throws Exception
 	{
@@ -80,46 +81,34 @@ public class PublisherScenario {
 		pub.logMessage("fin scenario normal1");
 	}
 
-	public static void testNormal2(Publisher pub) throws Exception
+	public static void testNormal(Publisher pub) throws Exception
 	{
 		System.out.println("[PublisherScenario:testNormal2] start");
-
-		if (pub.getPublisherId() > 4)
+		SIZECHAOS = 42;
+		canSleep = true;
+		if (pub.getPublisherId() > 5)
 			return;
-		testSmallChaos(pub);
-		return;
-		/*
-		MessageI[] allMessages1 = {new Message("1-pomme"), new Message("1-peche"), new Message("1-banane"), new Message("1-fraise")};
-		MessageI[] allMessages2 = {new Message("2-pomme"), new Message("2-peche"), new Message("2-banane"), new Message("2-fraise")};
-		MessageI[] allMessages3 = {new Message("3-pomme"), new Message("3-peche"), new Message("3-banane"), new Message("3-fraise")};
-		MessageI[] allMessages4 = {new Message("4-pomme"), new Message("4-peche"), new Message("4-banane"), new Message("4-fraise")};
-		allMessages1[1].getProperties().putProp("size", 4);allMessages1[3].getProperties().putProp("size", 8);
-		allMessages1[0].getProperties().putProp("size", 12);
-		Thread.sleep(100); // attend que les subs s'abonnent
-		for (int i= 0; i < 4; i++)
-		{
-			int tmp = (int)(Math.random() * 4);
-			if (pub.getPublisherId() == 1)
-			{
-				pub.publish(allMessages1[tmp], new String[] {"A","B","C"});
-			}
-			else if (pub.getPublisherId() == 2)
-			{
-				pub.publish(allMessages2[tmp], new String[] {"A","B","C"});
-			}else if (pub.getPublisherId() == 3)
-			{
-				pub.publish(allMessages3[tmp], new String[] {"A","B","C"});
-			}else 
-			{
-				pub.publish(allMessages4[tmp], new String[] {"A","B","C"});
-			}
-		}
-		pub.logMessage("fin scenario normal2");
-		System.out.println("fin scenario normal2");
-	*/}
+		testChaos(pub);
+	}
 
-
-	 static String[]  createTopics(String []ref)
+	public static void testBigger(Publisher pub) throws Exception
+	{
+		System.out.println("[PublisherScenario:testNormal2] start");
+		SIZECHAOS = 4200;
+		canSleep = false;
+		testChaos(pub);
+	}
+	
+	public static void testInsane(Publisher pub) throws Exception
+	{
+		System.out.println("[PublisherScenario:testNormal2] start");
+		SIZECHAOS = 420000;
+		canSleep = false;
+		testChaos(pub);
+	}
+	
+	
+	public static String[]  createTopics(String []ref)
 	{
 		int rand = (int)(Math.random() * ref.length) + 1;
 		ArrayList<String> liste = new ArrayList<>();
@@ -137,15 +126,12 @@ public class PublisherScenario {
 			liste.add(ref[k]);
 			res[i] = ref[k];
 		} 
-		
-		
 		return res;
 	}
 	
+	
 	private static Message[] CreateMessages(int id,String []reference)
 	{
-		
-		
 		ArrayList<Message> messages = new ArrayList<>();
 		int size = (int)(Math.random() * reference.length) + 1;
 		Message []res = new Message[size];
@@ -163,14 +149,15 @@ public class PublisherScenario {
 			messages.add(Msg);
 			res[i] = Msg;
 		}
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++)
+		{
 			if (Math.random() * 3 > 2)
 				res[i].getProperties().putProp("randInt", (int)(Math.random() * 21));
 		}
 		return (res);
 	}
 	
-	public static void testSmallChaos(Publisher pub) throws Exception
+	public static void testChaos(Publisher pub) throws Exception
 	{
 		System.out.println("[PublisherScenario:testSmallChaos] start");
 
@@ -217,7 +204,7 @@ public class PublisherScenario {
 						pub.publish(messages, subTopic);
 				}					
 			}
-			Thread.sleep(randSleep);
+			if (canSleep) Thread.sleep(randSleep);
 		}
 	}
 		
@@ -226,10 +213,7 @@ public class PublisherScenario {
 		if (pub.getPublisherId() > 1)
 			return;
 		
-		
 		pub.logMessage("fin scenario TestCompletPublisher");
 		System.out.println("[PublisherScenario:testCompletPublisher] end");
-
-		
 	}
 }

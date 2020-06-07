@@ -23,17 +23,10 @@ import messages.MessageI;
 public class Broker extends AbstractComponent implements ManagementImplementationI,PublicationsImplementationI, SubscriptionImplementationI{
 
 	/**
-	 * <String,ArrayList<MessageI>> messages: 
-	 * 	-String: topic
-	 * 	-ArrayList<MessageI>: liste des MessageI associes
-	 * 
-	 * Map<String,ArrayList<String>> abonnement: 
-	 * 	-String: topic
-	 * 	-ArrayList<String>: liste des uris des abonnes au topic
 	 *
-	 * Map<String,MessageFilterI> filters: 
-	 * 	-String: inbound port uri
-	 * 	-MessageFilterI: MessageFilterI associe	
+	 * Map<String,ArrayList<String, MessageFilterI>> abonnement: 
+	 * 	-String: topic
+	 * 	-ArrayList<String, MessageFilterI>: liste des uris des abonnes au topic et les Filtre associe
 	 * 
 	 * Map<String,ReceptionOutboundPort> subsobp: 
 	 * 	-String: uri de l'inbound port du  subscriber
@@ -42,19 +35,32 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	 * Map<ReceptionOutboundPort,ArrayList<MessageI>> published: 
 	 * 	-ReceptionOutboundPort: ReceptionOutboundPort du subscriber
 	 * 	-MessageI: message qui doit a été publié et qui doit être transmit au subscriber			
-	 * 
+	 *
+	 * Map<String, ArrayList<MessageI>> stack: Liste de paquets de messages 
+	 * 	-String: Uri de l'inbound port du  subscriber
+	 * 	-ArrayList<MessageI>: message qui doit a été publié et qui doit être transmit au subscriber			
+	 *
+	 * Map<String, boolean> hasToUpdate: 
+	 * 	-String: Uri de l'inbound port du  subscriber
+	 * 	-boolean: Si il n'a pas été mise a jour lors du dernier cycle			
+	 *
+	 * ArrayList<String> toSend: liste des uri des abonne qui doivent recevoir leur message 
+	 * 	
 			
 	 */
 	protected String uriPrefix;
 	protected final String acceptURI="handler-accept";
 	protected final String publishMessageURI = "message-URI";
+	protected final String publishPaquetURI = "paquet-URI";
 	private int 							nbSubscriber;
 	private final int 						BUFFER_MESSAGE = 10;
 	private final long 						BUFFER_TIME = 1000;
 	private final boolean					MODE_DEBUG = false;
+
 	private Map<String,ArrayList<Couple>> abonnements;
-	private ArrayList<String> allTopics;
 	private Map<String,ReceptionOutboundPort> subsobp;
+	private ArrayList<String> allTopics;
+	
 	private Map<String, ArrayList<MessageI>> stack;
 	private Map<String, Boolean> hasToUpdate;
 	private ArrayList<String> toSend;
@@ -142,19 +148,24 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		logMessage("[start] done");
 	}
 	
+	/**
+	 * execute() 
+	 * 
+	 * creer et envoi 2 thread appelant la fonction FinalSend et PeriodSend
+	 */
 	@Override
 	public void execute() throws Exception{
 		super.execute();
 		this.createNewExecutorService(publishMessageURI, 5,true);
-		this.createNewExecutorService("temp", 2,true);
-		this.runTask("temp", (ignore) -> { 	// ignore : @Type ComponentI 
+		this.createNewExecutorService(publishPaquetURI, 2,true);
+		this.runTask(publishPaquetURI, (ignore) -> { 	// ignore : @Type ComponentI 
 	        try {
 	        	FinalSend();
 	        } catch (Exception e) {	
 	            e.printStackTrace();
 	        }
 	    });
-		this.runTask("temp", (ignore) -> { 	// ignore : @Type ComponentI 
+		this.runTask(publishPaquetURI, (ignore) -> { 	// ignore : @Type ComponentI 
 	        try {
 	        	PeriodSend();
 	        } catch (Exception e) {	
@@ -163,7 +174,11 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	    });
 		logMessage("[Execute] done");
 	}
-	
+	/**
+	 * Des que la liste ToSend a des elements
+	 * envois tous les paquet de message au subsriber de toSend
+	 * @throws Exception
+	 */
 	private void FinalSend() throws Exception
 	{
 		while(true)
@@ -188,7 +203,11 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			stackLock.writeLock().unlock();
 		}
 	}
-	
+	/**
+	 * actualise en boucle tout les cycle de temp et ajoute les 
+	 * paquet des message non nul et dont l'abonne n'a pas deja recu ces message lors du precedent cycle
+	 * @throws Exception
+	 */
 	private void PeriodSend() throws Exception
 	{
 		boolean hasTonotify;
@@ -201,7 +220,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			stackLock.readLock().lock();
 			for(Map.Entry<String, Boolean> entry: hasToUpdate.entrySet())
 			{
-				if (entry.getValue() && (stack.get(entry.getKey()) == null || !stack.get(entry.getKey()).isEmpty()))
+				if (entry.getValue() && stack.get(entry.getKey()) != null && !stack.get(entry.getKey()).isEmpty())
 				{
 					hasTonotify = true;
 					toSend.add(entry.getKey());
@@ -217,14 +236,14 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 					if (MODE_DEBUG) System.out.println("Ca marche");
 					toSend.notify();
 				}
-		
 		}
 	}
 	
 	/**
-	 * lecture abonnements
-	 * lecture subsobp; 
-	*/
+	 *Utilise jusqu'a 5 threads en parallele
+	 * Soccupe de filtrer les message et les ajoute sur la liste stack des paquets 
+	 *  
+	 */
 	public  void  sendpublished(MessageI m,String topic)throws Exception {		
 		ArrayList<Couple> uris = abonnements.get(topic);		
 		ArrayList<MessageI> messages;
@@ -232,7 +251,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		
 		if (uris != null)
 		{
-			//if (MODE_DEBUG) System.out.println("[Broker:sendpublished] il y'a " + uris.size() + " aboonnes");
+			if (MODE_DEBUG) System.out.println("[Broker:sendpublished] il y'a " + uris.size() + " aboonnes");
 			for(Couple abonne_uri: uris)
 			{
 				ReceptionOutboundPort ri = subsobp.get(abonne_uri.getUri());
@@ -258,8 +277,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 								if (MODE_DEBUG) System.out.println("============Notify");
 								toSend.notify();							
 							}
-						}
-							
+						}		
 					}
 				}
 				else
@@ -282,7 +300,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	public void publish(MessageI m, String topic)throws Exception {
 			logMessage("[publish] try to publish : " + m.getPayload());
 			System.out.println("[broker:publish] publish:" + m.getPayload());
-			lock.writeLock().lock();
+			//lock.writeLock().lock();
 		try {
 			this.runTask(publishMessageURI, (ignore) -> { 	// ignore : @Type ComponentI 
 		        try {
@@ -293,7 +311,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		        }
 		    });
 		}finally {
-			lock.writeLock().unlock();
+		//	lock.writeLock().unlock();
 		}	
 	}
 	
@@ -312,6 +330,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			publish(m, string);
 		}
 	}
+	
 	/**ManagementCI
 	 *  abonnements ecriture
 	 *  allTopic ecriture
@@ -383,14 +402,17 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		
 		if(!subsobp.containsKey(inboundPortUri))
 		{
-			nbSubscriber++;
-			String uriSub = inboundPortUri + nbSubscriber;
-			ReceptionOutboundPort ropTmp =  new ReceptionOutboundPort(uriSub,this);
-			ropTmp.publishPort();
-			subsobp.put(inboundPortUri, ropTmp);
-			hasToUpdate.put(inboundPortUri, false);
-			this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
-			System.out.println("[Broker:subscribe] " + inboundPortUri + " doport connection done");
+			synchronized (subsobp)
+			{				
+				nbSubscriber++;
+				String uriSub = inboundPortUri + nbSubscriber;
+				ReceptionOutboundPort ropTmp =  new ReceptionOutboundPort(uriSub,this);
+				ropTmp.publishPort();
+				subsobp.put(inboundPortUri, ropTmp);
+				hasToUpdate.put(inboundPortUri, false);
+				this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
+				System.out.println("[Broker:subscribe] " + inboundPortUri + " doport connection done");
+			}
 		}
 		
 		if(!abonnements.containsKey(topic))
@@ -419,7 +441,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	
 	
 	/**
-	 * abonnements ...
+	 * 
 	 */
 	public  void modifyFilter(String topic,MessageFilterI newFilter, String inboundPortUri)throws Exception{
 		ArrayList<Couple> subTopic;
@@ -475,22 +497,16 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	public  String[] getTopics()throws Exception{
 		return (String[])allTopics.toArray(new String[allTopics.size()]);
 		}
-	
-	
+
 	@Override
 	public void				finalise() throws Exception
 	{
 		this.logMessage("finalising broker component.") ;
 		 super.finalise();
 	}
-
+	
 	@Override
 	public String getPublicationPortURI() throws Exception {
 		return this.bpublicationPlugin.getPublicationInboundPort().getPortURI();
 	}
-
 }
-	
-
-
-

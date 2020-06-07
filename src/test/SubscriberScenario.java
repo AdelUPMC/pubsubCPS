@@ -9,15 +9,15 @@ import messages.Properties;
 
 public class SubscriberScenario {
 
-	private static final int SIZECHAOS = 100;
+	private static int SIZECHAOS = 100;
+	private static  boolean canSleep = false;
 
 	public static void testCompletTopicSubcribe(Subscriber sub)
 	{
 		if (sub.getSubscriberId() == 1)
 			testCompletTopicSubcribeFirst(sub);
 	}
-	
-	
+		
 	public static void testBasic1(Subscriber sub) throws Exception
 	{
 		if (sub.getSubscriberId() > 1)
@@ -32,7 +32,7 @@ public class SubscriberScenario {
 		sub.unsubscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
 	}
 	
-		class FiltreSize implements MessageFilterI{
+	class FiltreSize implements MessageFilterI{
 		String name;
 		
 		public FiltreSize(String name) {
@@ -63,11 +63,13 @@ public class SubscriberScenario {
 			public boolean filter(MessageI m) {
 				Properties p = m.getProperties();
 				Integer res = null;
-				try {
+				try 
+				{
 					res = p.getIntProp("size");
-				} catch (InexistentPropertyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				}
+				catch (InexistentPropertyException e)
+				{
+					return false;
 				}
 				return res > 5;
 			}
@@ -88,14 +90,16 @@ public class SubscriberScenario {
 		if (sub.getSubscriberId() > 4)
 			return;
 		MessageFilterI f = new MessageFilterI() {
-			public boolean filter(MessageI m) {
+			public boolean filter(MessageI m)
+			{
 				Properties p = m.getProperties();
 				Integer res = null;
-				try {
+				try 
+				{
 					res = p.getIntProp("size");
-				} catch (InexistentPropertyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (InexistentPropertyException e)
+				{
+					return false;
 				}
 				return res > 5;
 			}
@@ -111,34 +115,30 @@ public class SubscriberScenario {
 			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
 	}
 	
-	public static void testNormal2(Subscriber sub) throws Exception
+	public static void testNormal(Subscriber sub) throws Exception
 	{
 		System.out.println("[SubsrciberScenario:TestNormal2]");
-		if (sub.getSubscriberId() > 4)
+		if (sub.getSubscriberId() > 5)
 			return;
-		testSmallChaos(sub);
-		return;
-		/*
-		 * MessageFilterI f = new MessageFilterI() {
-			public boolean filter(MessageI m) {
-				Properties p = m.getProperties();
-				Integer res = p.getIntProp("size");
-				return res > 5;
-			}
-		};
-		if (sub.getSubscriberId() == 1)
-		{
-		sub.createTopic("A");
-		sub.createTopic("C");	
-		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
-		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
-		}
-		else
-			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
-			*/
+		testChaos(sub);
 	}
 	
-	public static void testSmallChaos(Subscriber sub) throws Exception
+	public static void testBigger(Subscriber sub) throws Exception
+	{
+		SIZECHAOS = 2100;
+		canSleep = false;
+		if (sub.getSubscriberId() > 5)
+			return;
+		testChaos(sub);
+	}
+	
+	public static void testInsane(Subscriber sub) throws Exception
+	{
+		SIZECHAOS = 21000;
+		canSleep = false;
+		testChaos(sub);
+	}
+	public static void testChaos(Subscriber sub) throws Exception
 	{
 		System.out.println("[SubsrciberScenario:TestSmallChaos] start");
 		String[] Topics = {"fruits", "legume", "pays", "villes", "continents"};
@@ -151,13 +151,15 @@ public class SubscriberScenario {
 			{
 				Properties p = m.getProperties();
 				Integer res = null;
-				try {
+				try 
+				{
 					res = p.getIntProp("randInt");
-				} catch (InexistentPropertyException e) {
-					// TODO Auto-generated catch block
+				} catch (InexistentPropertyException e)
+				{
+					
 					return false;
 				}
-				return res < (Math.random() * 42) || true;
+				return res < (Math.random() * 42);
 			}
 		};
 		MessageFilterI f2 = new MessageFilterI()
@@ -166,13 +168,14 @@ public class SubscriberScenario {
 			{
 				Properties p = m.getProperties();
 				Integer res = null;
-				try {
+				try
+				{
 					res = p.getIntProp("randInt");
-				} catch (InexistentPropertyException e) {
-					// TODO Auto-generated catch block
+				} catch (InexistentPropertyException e)
+				{	
 					return false;
 				}
-				return res % 2 == 0 || true;
+				return res % 2 == 0;
 			}
 		};
 		
@@ -210,7 +213,7 @@ public class SubscriberScenario {
 				else
 					sub.subscribe(subTopic[0], f, sub.getReceptionPlugin().receptionInboundPortURI);									
 			}
-			Thread.sleep(randSleep);
+			if (canSleep) Thread.sleep(randSleep);
 		}
 	}
 		

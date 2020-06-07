@@ -47,7 +47,7 @@ public class CVM extends AbstractCVM {
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.COMPONENT_DEPLOYMENT) ;
 	
 		//TestScenario.execute(this, TestScenario.TestCompletTopSub);
-		TestScenario.execute(this, TestScenario.SCENARIO_NORMAL2);	
+		TestScenario.execute(this, TestScenario.SCENARIO_NORMAL);	
 		
 		super.deploy();
 		assert	this.deploymentDone();

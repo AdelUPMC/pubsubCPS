@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import fr.sorbonne_u.components.AbstractPlugin;
 import fr.sorbonne_u.components.ComponentI;
-import gestMessages.interfaces.ReceptionCI;
 import gestMessages.interfaces.ReceptionImplementationI;
 import gestMessages.ports.ReceptionInboundPortForPlugin;
 import messages.MessageI;

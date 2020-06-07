@@ -68,14 +68,6 @@ public class Publisher extends AbstractComponent {
 		managementPlugin.setPluginURI(this.PUBLISHER_MANAGEMENT_PLUGIN_URI);
 		this.installPlugin(publicationPlugin);
 		this.installPlugin(managementPlugin);
-		/**TODO:
-		 * -4 m�thodes publish de PUBLICATIONCI
-		 * scn�nario: un seul publieur va publier:
-		 * 		-un message sur un topic
-		 * 		-un message sur plusieurs topics
-		 * 		-plusieurs messages sur un topic
-		 * 		-plusieurs messages sur plusieurs topics
-		 * **/
 		if (scenario == null)
 		{
 			return;
@@ -91,8 +83,14 @@ public class Publisher extends AbstractComponent {
 		case TestScenario.SCENARIO_NORMAL1:	
 			PublisherScenario.testNormal1(this);
 			break;
-		case TestScenario.SCENARIO_NORMAL2:	
-			PublisherScenario.testNormal2(this);
+		case TestScenario.SCENARIO_NORMAL:	
+			PublisherScenario.testNormal(this);
+			break;
+		case TestScenario.SCENARIO_BIGGER:	
+			PublisherScenario.testBigger(this);
+			break;
+		case TestScenario.SCENARIO_INSANE:	
+			PublisherScenario.testInsane(this);
 			break;
 		case TestScenario.TestCompletPublisher:
 			PublisherScenario.testCompletPublisher(this);

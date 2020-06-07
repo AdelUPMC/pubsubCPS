@@ -87,13 +87,18 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 		case TestScenario.SCENARIO_NORMAL1:	
 			SubscriberScenario.testNormal1(this);
 			break;
-		case TestScenario.SCENARIO_NORMAL2:	
-			SubscriberScenario.testNormal2(this);
+		case TestScenario.SCENARIO_NORMAL:	
+			SubscriberScenario.testNormal(this);
 			break;
-
+		case TestScenario.SCENARIO_BIGGER:
+			SubscriberScenario.testBigger(this);
+			break;
+		case TestScenario.SCENARIO_INSANE:
+			SubscriberScenario.testInsane(this);
+			break;		
 		case TestScenario.TestCompletTopSub:
 			SubscriberScenario.testCompletTopicSubcribe(this);
-			break;
+			break;			
 		default:
 			SubscriberScenario.testBasic1(this);
 			break;
