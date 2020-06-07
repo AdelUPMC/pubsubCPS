@@ -2,12 +2,12 @@ package gestMessages.plugins;
 
 import fr.sorbonne_u.components.AbstractPlugin;
 import fr.sorbonne_u.components.ComponentI;
-import fr.sorbonne_u.components.exceptions.PreconditionException;
 import gestMessages.interfaces.ReceptionCI;
+import gestMessages.interfaces.ReceptionImplementationI;
 import gestMessages.ports.ReceptionInboundPortForPlugin;
 import messages.MessageI;
 
-public class SubscriberReceptionPlugin extends AbstractPlugin implements ReceptionCI {
+public class SubscriberReceptionPlugin extends AbstractPlugin implements ReceptionImplementationI {
 	
 	
 	/**
@@ -28,19 +28,19 @@ public class SubscriberReceptionPlugin extends AbstractPlugin implements Recepti
     @Override
     public void			installOn(ComponentI owner) throws Exception
     {
+    	
         super.installOn(owner) ;
-        
-        assert	owner instanceof ReceptionCI ;        
-        this.addOfferedInterface(ReceptionCI.class) ;
-        System.out.println("fin install ON ");
+        assert	owner instanceof ReceptionImplementationI ;        
+        this.addOfferedInterface(ReceptionImplementationI.class) ;
     }
     
     @Override
-    public void initialise() throws Exception {
+    public void initialise() throws Exception
+    {
     	super.initialise();
     	this.ribp = new ReceptionInboundPortForPlugin(receptionInboundPortURI,this.getPluginURI(),this.owner) ;
-    	System.out.println("debtu");
     	this.ribp.publishPort() ;    	
+    	
     }
     
     @Override
@@ -48,17 +48,17 @@ public class SubscriberReceptionPlugin extends AbstractPlugin implements Recepti
     {
         this.ribp.unpublishPort();
         this.ribp.destroyPort() ;
-        this.removeOfferedInterface(ReceptionCI.class) ;
+        this.removeOfferedInterface(ReceptionImplementationI.class) ;
     }
     
     @Override
     public void acceptMessage(MessageI m) throws Exception {
-    	((ReceptionCI)this.owner).acceptMessage(m);
+    	((ReceptionImplementationI)this.owner).acceptMessage(m);
     }
 
     @Override
     public void acceptMessages(MessageI[] ms) throws Exception {
-    	((ReceptionCI)this.owner).acceptMessages(ms);
+    	((ReceptionImplementationI)this.owner).acceptMessages(ms);
     }
 
 }

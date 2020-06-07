@@ -1,3 +1,4 @@
+
 package gestMessages;
 
 import fr.sorbonne_u.components.cvm.AbstractCVM;
@@ -40,19 +41,17 @@ public class CVM extends AbstractCVM {
 	public void			deploy() throws Exception
 	{
 		assert	!this.deploymentDone() ;
+	
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.PUBLIHSING) ;
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.CONNECTING) ;
 		//AbstractCVM.DEBUG_MODE.add(CVMDebugModes.COMPONENT_DEPLOYMENT) ;
 	
-		
 		//TestScenario.execute(this, TestScenario.TestCompletTopSub);
-		TestScenario.execute(this, TestScenario.SCENARIO_BASIC1);
-		
+		TestScenario.execute(this, TestScenario.SCENARIO_NORMAL2);	
 		
 		super.deploy();
 		assert	this.deploymentDone();
 		}
-
 
 
 	/**

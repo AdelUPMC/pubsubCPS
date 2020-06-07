@@ -7,13 +7,13 @@ import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentShutdownException;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import gestMessages.TestScenario;
-import gestMessages.interfaces.ReceptionImplementationI;
+import gestMessages.interfaces.ReceptionCI;
 import gestMessages.plugins.PubSubManagementPlugin;
 import gestMessages.plugins.SubscriberReceptionPlugin;
 import messages.MessageFilterI;
 import messages.MessageI;
 import test.SubscriberScenario;
-public class Subscriber extends AbstractComponent implements ReceptionImplementationI {
+public class Subscriber extends AbstractComponent implements ReceptionCI {
 
     protected String SUBSCRIBER_MANAGEMENT_PLUGIN_URI = "subscriber_management_URI-" ;
     protected String SUBSCRIBER_RECEPTION_PLUGIN_URI = "subscriber_reception_URI-" ;
@@ -50,7 +50,7 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 		
 		this.tracer.setTitle("software_developer-"+nbsubscribers);
 		this.tracer.setRelativePosition(nbsubscribers, 3) ;
-		System.out.println("[Subsrciber:Subscriber]Subscriber crée");
+		System.out.println("Subscriber crée");
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 	
 	public void execute() throws Exception{
 		//create plugings
-		this.receptionPlugin = new SubscriberReceptionPlugin(receptionInboundPortURI, SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
+		this.receptionPlugin = new SubscriberReceptionPlugin(receptionInboundPortURI,SUBSCRIBER_RECEPTION_PLUGIN_URI) ;
 		this.managementPlugin = new PubSubManagementPlugin();
 		
 		//install them
@@ -70,11 +70,9 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 		managementPlugin.setPluginURI(this.SUBSCRIBER_MANAGEMENT_PLUGIN_URI);
 		this.installPlugin(managementPlugin);
 		this.installPlugin(receptionPlugin);	
+		
 		if (scenario == null)
-		{
-			System.out.println("[Subscriber:execute]Aucun scenario lancer");
 			return;
-		}
 		switch (scenario)
 		{
 		case TestScenario.SCENARIO_BASIC1:	
@@ -83,13 +81,6 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 		case TestScenario.SCENARIO_BASIC2:	
 			SubscriberScenario.testBasic2(this);
 			break;
-		case TestScenario.SCENARIO_NORMAL1:	
-			SubscriberScenario.testNormal1(this);
-			break;
-		case TestScenario.SCENARIO_NORMAL2:	
-			SubscriberScenario.testNormal2(this);
-			break;
-
 		case TestScenario.TestCompletTopSub:
 			SubscriberScenario.testCompletTopicSubcribe(this);
 			break;
@@ -120,7 +111,7 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 	
 	//ReceptionCI
 	public void acceptMessage(MessageI m) throws Exception {
-		System.out.println("[Subsrciber:Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
+		System.out.println("[Subsriber:acceptMessage] " + m.getPayload());
 		this.logMessage("[Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 	}
 	public void acceptMessages(MessageI[] ms) throws Exception {

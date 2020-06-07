@@ -2,11 +2,10 @@ package gestMessages.ports;
 
 import fr.sorbonne_u.components.ComponentI;
 import fr.sorbonne_u.components.ports.forplugins.AbstractInboundPortForPlugin;
-import gestMessages.interfaces.ReceptionCI;
 import gestMessages.interfaces.ReceptionImplementationI;
 import messages.MessageI;
 
-public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin implements ReceptionCI {
+public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin implements ReceptionImplementationI {
 
 	/***
 	 * extends the standard ReceptiontInboundPort for the case where 
@@ -15,13 +14,13 @@ public class ReceptionInboundPortForPlugin extends AbstractInboundPortForPlugin 
 	private static final long serialVersionUID = 1L;
 
 	public ReceptionInboundPortForPlugin(String uri, String pluginURI, ComponentI owner) throws Exception {
-		super(uri, ReceptionCI.class, pluginURI, owner);
-		assert owner instanceof ReceptionCI;
+		super(uri, ReceptionImplementationI.class, pluginURI, owner);
+		assert owner instanceof ReceptionImplementationI;
 	}
 
 	public ReceptionInboundPortForPlugin(String pluginURI, ComponentI owner) throws Exception {
-		super(ReceptionCI.class, pluginURI, owner);
-		assert owner instanceof ReceptionCI;
+		super(ReceptionImplementationI.class, pluginURI, owner);
+		assert owner instanceof ReceptionImplementationI;
 	}
 
 	@Override

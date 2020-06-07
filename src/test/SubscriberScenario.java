@@ -1,11 +1,14 @@
 package test;
 
+
 import gestMessages.components.Subscriber;
 import messages.MessageFilterI;
 import messages.MessageI;
 import messages.Properties;
 
 public class SubscriberScenario {
+
+	private static final int SIZECHAOS = 10;
 
 	public static void testCompletTopicSubcribe(Subscriber sub)
 	{
@@ -66,6 +69,120 @@ public class SubscriberScenario {
 		else
 			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
 	}
+	
+	public static void testNormal1(Subscriber sub) throws Exception
+	{
+		if (sub.getSubscriberId() > 4)
+			return;
+		MessageFilterI f = new MessageFilterI() {
+			public boolean filter(MessageI m) {
+				Properties p = m.getProperties();
+				Integer res = p.getIntProp("size");
+				return res > 5;
+			}
+		};
+		if (sub.getSubscriberId() == 1)
+		{
+		sub.createTopic("A");
+		sub.createTopic("C");	
+		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
+		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
+		}
+		else
+			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
+	}
+	
+	public static void testNormal2(Subscriber sub) throws Exception
+	{
+		System.out.println("[SubsrciberScenario:TestNormal2]");
+		if (sub.getSubscriberId() > 4)
+			return;
+		testSmallChaos(sub);
+		return;
+		/*
+		 * MessageFilterI f = new MessageFilterI() {
+			public boolean filter(MessageI m) {
+				Properties p = m.getProperties();
+				Integer res = p.getIntProp("size");
+				return res > 5;
+			}
+		};
+		if (sub.getSubscriberId() == 1)
+		{
+		sub.createTopic("A");
+		sub.createTopic("C");	
+		sub.subscribe("A", sub.getReceptionPlugin().receptionInboundPortURI);
+		sub.subscribe("B", sub.getReceptionPlugin().receptionInboundPortURI);
+		}
+		else
+			sub.subscribe("C", f, sub.getReceptionPlugin().receptionInboundPortURI);
+			*/
+	}
+	
+	public static void testSmallChaos(Subscriber sub) throws Exception
+	{
+		System.out.println("[SubsrciberScenario:TestSmallChaos] start");
+		String[] Topics = {"fruits", "legume", "pays", "villes", "continents"};
+		String[] subTopic;
+		int rand1, randSleep;
+		
+		MessageFilterI f = new MessageFilterI()
+		{
+			public boolean filter(MessageI m)
+			{
+				Properties p = m.getProperties();
+				Integer res = p.getIntProp("randInt");
+				return res < (Math.random() * 42) || true;
+			}
+		};
+		MessageFilterI f2 = new MessageFilterI()
+		{
+			public boolean filter(MessageI m)
+			{
+				Properties p = m.getProperties();
+				Integer res = p.getIntProp("randInt");
+				return res % 2 == 0 || true;
+			}
+		};
+		
+		for (int i = 0; i < SIZECHAOS; i++)
+		{
+			rand1 = (int)(Math.random() * 8);
+			randSleep = (int)(Math.random() * 100) + 1;
+			subTopic = PublisherScenario.createTopics(Topics);
+			
+			if (rand1 == 0)
+			{
+				if (subTopic.length == 1)
+					sub.createTopic(subTopic[0]);
+				else
+					sub.createTopics(subTopic);
+			}
+			else if (rand1 == 1)
+			{
+				rand1 = (int)(Math.random() * 5);
+				sub.destroyTopic(Topics[rand1]);
+			}
+			else if (rand1 == 2)
+				sub.unsubscribe(Topics[(int)(Math.random() * Topics.length)], sub.getReceptionPlugin().receptionInboundPortURI);
+			else if (rand1 == 3)
+				sub.modifyFilter(Topics[(int)(Math.random() * Topics.length)], f2, sub.getReceptionPlugin().receptionInboundPortURI);
+			else
+			{
+				if (Math.random() > 0.3)
+				{
+					if (subTopic.length == 1)
+						sub.subscribe(subTopic[0], sub.getReceptionPlugin().receptionInboundPortURI);
+					else
+						sub.subscribe(subTopic, sub.getReceptionPlugin().receptionInboundPortURI);
+				}
+				else
+					sub.subscribe(subTopic[0], f, sub.getReceptionPlugin().receptionInboundPortURI);									
+			}
+			Thread.sleep(randSleep);
+		}
+	}
+		
 	
 	private static void testCompletTopicSubcribeFirst(Subscriber sub)
 	{

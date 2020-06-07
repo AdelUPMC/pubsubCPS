@@ -13,6 +13,8 @@ import gestMessages.components.Broker;
 public class TestScenario {
 	public static final String	SCENARIO_BASIC1 = "scenario-basic-1";
 	public static final String	SCENARIO_BASIC2 = "scenario-basic-2";
+	public static final String	SCENARIO_NORMAL1 = "scenario-normal-1";
+	public static final String	SCENARIO_NORMAL2 = "scenario-normal-2";
 	public static final String  TestCompletPublisher = "testCompletPublisher-1";
 	public static final String	TestCompletTopSub = "TestCompletTopSub-1";
 
@@ -40,6 +42,12 @@ public class TestScenario {
 			break;
 		case SCENARIO_BASIC2:
 			execute_scenario_basic2();
+			break;
+		case SCENARIO_NORMAL1:
+			execute_scenario_normal1();
+			break;
+		case SCENARIO_NORMAL2:
+			execute_scenario_normal2();
 			break;
 		case TestCompletTopSub:
 			execute_testCompletSubscriber();
@@ -105,6 +113,74 @@ public class TestScenario {
 		cvm.toggleTracing(this.subscribersURI.get(1));
 		cvm.toggleTracing(this.publishersURI.get(0));
 		cvm.toggleTracing(this.publishersURI.get(1));
+	}
+	
+	/*
+	 * 	 4 sub et 4 pub 
+	 * 
+	 * 	creation des topics 'A' et 'C'
+	 * 	sub1 abonner  au topic 'A' et 'B' 
+	 * 	sub2 abonner au topic 'B' et 'C' (filtre sur la "size")
+	 * 
+	 * pub1 publie un message avec le topic 'A' , 'B' et 'C' (sans filtre)
+	 * pub2 publie un message sur 'A' et 'C' avec une propriete size = 10
+	 * 
+	 */
+	private void execute_scenario_normal1() throws Exception
+	{
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL1));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL1));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL1));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL1));
+		
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL1));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL1));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL1));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL1));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL1));
+		
+		cvm.toggleTracing(this.subscribersURI.get(0));
+		cvm.toggleTracing(this.subscribersURI.get(1));
+		cvm.toggleTracing(this.publishersURI.get(0));
+		cvm.toggleTracing(this.publishersURI.get(1));
+		cvm.toggleTracing(this.subscribersURI.get(2));
+		cvm.toggleTracing(this.subscribersURI.get(3));
+		cvm.toggleTracing(this.publishersURI.get(2));
+		cvm.toggleTracing(this.publishersURI.get(3));
+	}
+	/*
+	 * 	 4 sub et 4 pub 
+	 * 
+	 * 	creation des topics 'A' et 'C'
+	 * 	sub1 abonner  au topic 'A' et 'B' 
+	 * 	sub2 abonner au topic 'B' et 'C' (filtre sur la "size")
+	 * 
+	 * pub1 publie un message avec le topic 'A' , 'B' et 'C' (sans filtre)
+	 * pub2 publie un message sur 'A' et 'C' avec une propriete size = 10
+	 * 
+	 */
+	private void execute_scenario_normal2() throws Exception
+	{
+		System.out.println("Execution du scenario normal v2");
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL2));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL2));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL2));
+		this.subscribersURI.add(ComponentFactory.createSubscriber(CVM.ManagementOutboundPortURIsub, SCENARIO_NORMAL2));
+		
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL2));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL2));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL2));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL2));
+		this.publishersURI.add(ComponentFactory.createPublisher(CVM.PublicationOutboundPortURI, CVM.ManagementOutboundPortURIpub, SCENARIO_NORMAL2));
+		
+		cvm.toggleTracing(this.subscribersURI.get(0));
+		cvm.toggleTracing(this.subscribersURI.get(1));
+		cvm.toggleTracing(this.subscribersURI.get(2));
+		cvm.toggleTracing(this.subscribersURI.get(3));
+		cvm.toggleTracing(this.publishersURI.get(0));
+		cvm.toggleTracing(this.publishersURI.get(1));
+		cvm.toggleTracing(this.publishersURI.get(2));
+		cvm.toggleTracing(this.publishersURI.get(3));
 	}
 	
 	/*

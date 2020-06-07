@@ -22,6 +22,7 @@ public class BrokerPublicationPlugin extends AbstractPlugin implements Publicati
         this.addOfferedInterface(PublicationCI.class) ;
         this.pibp = new PublicationInboundPortForPlugin(this.getPluginURI(), this.owner) ;
         this.pibp.publishPort();
+        System.out.println("Classe " + this.owner.getClass());
     }
 
   

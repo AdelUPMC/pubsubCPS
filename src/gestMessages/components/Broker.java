@@ -10,18 +10,17 @@ import fr.sorbonne_u.components.cvm.AbstractCVM;
 import fr.sorbonne_u.components.exceptions.ComponentStartException;
 import fr.sorbonne_u.components.exceptions.PreconditionException;
 import gestMessages.connectors.ReceptionConnector;
-import gestMessages.interfaces.ManagementCI;
 import gestMessages.interfaces.ManagementImplementationI;
-import gestMessages.interfaces.PublicationCI;
 import gestMessages.interfaces.PublicationsImplementationI;
 import gestMessages.interfaces.ReceptionCI;
+import gestMessages.interfaces.SubscriptionImplementationI;
 import gestMessages.plugins.BrokerManagementPlugin;
 import gestMessages.plugins.BrokerPublicationPlugin;
 import gestMessages.ports.ReceptionOutboundPort;
 import messages.MessageFilterI;
 import messages.MessageI;
 
-public class Broker extends AbstractComponent implements ManagementImplementationI,PublicationsImplementationI{
+public class Broker extends AbstractComponent implements ManagementImplementationI,PublicationsImplementationI, SubscriptionImplementationI{
 
 	/**
 	 * <String,ArrayList<MessageI>> messages: 
@@ -53,18 +52,19 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	
 	//private Map<String,ArrayList<MessageI>> messages;
 	//private Map<String,ArrayList<String>> abonnement;
-	private Map<String,ArrayList<Couple>> abonnements;
 	//private Map<String, MessageFilterI> filters;
+	private Map<String,ArrayList<Couple>> abonnements;
 	private ArrayList<String> allTopics;
 	private Map<String,ReceptionOutboundPort> subsobp;
 	//private Map<ReceptionOutboundPort,ArrayList<MessageI>> published;
-	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	
+	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	protected String BROKER_PUBLICATION_PLUGIN_URI = "broker_publication_URI-" ;
     protected String BROKER_MANAGEMENT_PLUGIN_URI = "broker_management_URI-" ;
     private BrokerManagementPlugin bmanagementPlugin;
     private BrokerPublicationPlugin bpublicationPlugin;
-	private class Couple
+	
+    private class Couple
 	{
 		private final String uri;
 		private MessageFilterI filtre;
@@ -144,8 +144,13 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		logMessage("[Execute] done");
 	}
 	
-	public void sendpublished(MessageI m,String topic)throws Exception {
+	/**
+	 * lecture abonnements
+	 * lecture subsobp; 
+	*/
+	public  void  sendpublished(MessageI m,String topic)throws Exception {
 		ArrayList<Couple> uris = abonnements.get(topic);
+		lock.readLock().lock();
 		if (uris != null)
 		{
 			for(Couple abonne_uri: uris)
@@ -154,24 +159,29 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				if (ri != null)
 				{
 					logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri.getUri());
-					if (abonne_uri.hasFiltre() && abonne_uri.getFiltre().filter(m))
+					
+					if ((abonne_uri.hasFiltre() && abonne_uri.getFiltre().filter(m)) || !abonne_uri.hasFiltre())
+					{
 						ri.acceptMessage(m);
+					}
 				}
 				else
 				{
 					System.out.println("[sendPublished] PROBLEME un abooner n'est pas connecter");
 				}
-		}
+			}
 		}
 		if (uris == null || uris.isEmpty())
 			logMessage("[sendpulished] aucun abonner au topic :" + topic);
-		System.out.println("[Broker:sendpublished] fin");
+		else
+			System.out.println("[Broker:sendpublished] fin " + uris.size() + " for "+ topic);
+		lock.readLock().unlock();
 	}
 	
 	/*PublicationCI*/
 	public void publish(MessageI m, String topic)throws Exception {
 			logMessage("[publish] try to publish : " + m.getPayload());
-			System.out.println("broker publish :" + m.getPayload());
+			System.out.println("[broker:publish] publish:" + m.getPayload());
 			lock.writeLock().lock();
 		try {
 			this.runTask(publishMessageURI, (ignore) -> { 	// ignore : @Type ComponentI 
@@ -201,8 +211,12 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			publish(m, string);
 		}
 	}
-	/*ManagementCI*/
-	public void createTopic(String topic) throws Exception{
+	/**ManagementCI
+	 *  abonnements ecriture
+	 *  allTopic ecriture
+	 */
+	public  void createTopic(String topic) throws Exception{
+		lock.writeLock().lock();
 		if(!this.abonnements.containsKey(topic)) {
 			this.allTopics.add(topic);
 			this.abonnements.put(topic, new ArrayList<Couple>());
@@ -211,6 +225,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		else {
 			logMessage("[createTopic] " + topic + " already exists");
 		}
+		lock.writeLock().unlock();
 	}
 	
 	public void createTopics(String[] topics)throws Exception{
@@ -219,7 +234,12 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		}
 	}
 	
-	public void destroyTopic(String topic)throws Exception{
+	/**
+	 *  abonnements ecriture
+	 * 	allTopic ecriture
+	 */
+	public  void destroyTopic(String topic)throws Exception{
+		lock.writeLock().lock();
 		if (this.abonnements.get(topic) != null)
 		{
 			this.allTopics.remove(topic);
@@ -229,10 +249,15 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		}
 		else
 			logMessage("[destroyTopic] topic nonexistent");
-		System.out.println("Broker destroyed topic :" + topic);	
+		lock.writeLock().unlock();
+		System.out.println("[Broker:destroyTopic] Broker destroyed topic :" + topic);	
 	}
 	
-	public boolean isTopic(String topic)throws Exception{
+	/**
+	 *  abonnements lecture(non-Javadoc)
+	 * 
+	 */
+	public  boolean isTopic(String topic)throws Exception{
 		return this.abonnements.containsKey(topic);
 	}
 	
@@ -246,8 +271,12 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			subscribe(topic, null, inboundPortUri);
 		}
 	}
-	
-	public void subscribe(String topic,MessageFilterI newFilter, String inboundPortUri)throws Exception{
+	/**
+	 * abonement ecriture
+	 * subobp ecriture
+	 * 
+	 */
+	public  void subscribe(String topic,MessageFilterI newFilter, String inboundPortUri)throws Exception{
 		ArrayList<Couple> subsriber;
 		logMessage("[subscribe] " + inboundPortUri + " to " + topic + "");
 		
@@ -261,33 +290,39 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
 			System.out.println("[Broker:subscribe] " + inboundPortUri + " doport connection done");
 		}
+		
 		if(!abonnements.containsKey(topic))
 		{
-			System.out.println("Ce topic n'existe pas !!");
+			System.out.println("[Broker:subscribe]Ce topic n'existe pas: " + topic);
 			createTopic(topic);
 		}
 		subsriber = abonnements.get(topic);		
-		 
+		lock.writeLock().lock(); 
 		for (Couple couple : subsriber) {
 			if (couple.getUri().equals(inboundPortUri))
 			{
 				logMessage("[subscribe] " + inboundPortUri + "est deja aboné au topic " + topic );
-				System.out.println("Vous etes deja abonné");		
+				System.out.println("[Broker:subscribe]Vous etes deja abonné");		
 				return;
 			}
 		}
 		subsriber.add(new Couple(inboundPortUri, newFilter));
 		logMessage("[subscribe] " + inboundPortUri + " to " + topic + " done");
-		
+		lock.writeLock().unlock();
 		
 	}
-	public void modifyFilter(String topic,MessageFilterI newFilter, String inboundPortUri)throws Exception{
+	
+	
+	/**
+	 * abonnements ...
+	 */
+	public  void modifyFilter(String topic,MessageFilterI newFilter, String inboundPortUri)throws Exception{
 		ArrayList<Couple> subTopic;
-		
+		lock.readLock().lock();
 		subTopic = abonnements.get(topic);
 		if (subTopic == null)
 		{
-			logMessage("[modifyFilter] personne n'est abonné a ce topic");
+			logMessage("[Broker:modifyFilter] personne n'est abonné a ce topic " +  topic);
 			return;
 		}
 		for (Couple couple : subTopic) {
@@ -298,11 +333,15 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				return;
 			}
 		}
-			logMessage("[modifyFilter] " + inboundPortUri + " n'est abonné a ce topic");
+		lock.readLock().unlock();
+			logMessage("[modifyFilter] " + inboundPortUri + " n'est abonné a ce topic: " + topic);
 			
 	}
 	
-	public void unsubscribe(String topic,String inboundPortUri)throws Exception{
+	/**
+	 * abonnement ecriture
+	 */
+	public  void unsubscribe(String topic,String inboundPortUri)throws Exception{
 		ArrayList<Couple> subTopic;
 
 		
@@ -312,6 +351,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			logMessage("[unsubscribe] Inutile car personne n'est abonné a ce topic");
 			return;
 		}
+		lock.writeLock().lock();
 		for (int i = 0; i < subTopic.size(); i++) {
 			if (subTopic.get(i).getUri().equals(inboundPortUri))
 			{
@@ -320,10 +360,14 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 				return;
 			}
 		}
+		lock.writeLock().unlock();
 		logMessage("[unsubscribe] Inutile car " + inboundPortUri + " n'est abonné a ce topic");
 	}
 	
-	public String[] getTopics()throws Exception{
+	/**
+	 *  lectureAllTopic
+	 */
+	public  String[] getTopics()throws Exception{
 		return (String[])allTopics.toArray(new String[allTopics.size()]);
 		}
 	
