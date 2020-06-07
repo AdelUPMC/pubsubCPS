@@ -11,8 +11,5 @@
 			rmiRegistryCreator="true" mainclass="gestMessages.DistributedCVM" />
 		<jvm2hostname jvmuri="JvmBroker2" hostname="localhost"
 			rmiRegistryCreator="false" mainclass="gestMessages.DistributedCVM" />
-		<jvm2hostname jvmuri="jvmReplicateur"
-			rmiRegistryCreator="false" hostname="localhost"
-			mainclass="gestMessages.DistributedCVM" />
 	</jvms2hostnames>
 </deployment>
