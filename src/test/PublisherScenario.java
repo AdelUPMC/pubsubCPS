@@ -8,7 +8,7 @@ import messages.MessageI;
 
 public class PublisherScenario {
 	
-	private static final int SIZECHAOS = 10000;
+	private static final int SIZECHAOS = 1000;
 
 	public static void testBasic1(Publisher pub) throws Exception
 	{

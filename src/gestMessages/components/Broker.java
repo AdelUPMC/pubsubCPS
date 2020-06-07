@@ -17,6 +17,7 @@ import gestMessages.interfaces.SubscriptionImplementationI;
 import gestMessages.plugins.BrokerManagementPlugin;
 import gestMessages.plugins.BrokerPublicationPlugin;
 import gestMessages.ports.ReceptionOutboundPort;
+import messages.Message;
 import messages.MessageFilterI;
 import messages.MessageI;
 
@@ -49,16 +50,18 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	protected final String acceptURI="handler-accept";
 	protected final String publishMessageURI = "message-URI";
 	private int 							nbSubscriber;
-	
-	//private Map<String,ArrayList<MessageI>> messages;
-	//private Map<String,ArrayList<String>> abonnement;
-	//private Map<String, MessageFilterI> filters;
+	private final int 						BUFFER_MESSAGE = 10;
+	private final long 						BUFFER_TIME = 1000;
 	private Map<String,ArrayList<Couple>> abonnements;
 	private ArrayList<String> allTopics;
 	private Map<String,ReceptionOutboundPort> subsobp;
-	//private Map<ReceptionOutboundPort,ArrayList<MessageI>> published;
+	private Map<String, ArrayList<MessageI>> stack;
+	private Map<String, Boolean> hasToUpdate;
+	private ArrayList<String> toSend;
+	
 	
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReadWriteLock stackLock = new ReentrantReadWriteLock();
 	protected String BROKER_PUBLICATION_PLUGIN_URI = "broker_publication_URI-" ;
     protected String BROKER_MANAGEMENT_PLUGIN_URI = "broker_management_URI-" ;
     private BrokerManagementPlugin bmanagementPlugin;
@@ -88,6 +91,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			return (filtre != null);
 		}
 	}
+    
 
 	protected Broker(int nbThreads, int nbSchedulableThreads) {
 		super(nbThreads, nbSchedulableThreads);
@@ -104,10 +108,12 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		assert	ManagementInboundPortURI != null :
 			new PreconditionException("error ManagementInboundPortURI null") ;
 		this.uriPrefix=uri;
-		this.abonnements= new HashMap<>();
-		this.subsobp= new HashMap<>();
-	//	this.published= new HashMap<>();
+		this.abonnements = new HashMap<>();
+		this.stack = new HashMap<>();
+		this.subsobp = new HashMap<>();	
+		this.hasToUpdate = new HashMap<>();	
 		this.allTopics = new ArrayList<>();
+		this.toSend = new ArrayList<>();
 		
 		//create plugins
 		this.bmanagementPlugin = new BrokerManagementPlugin();
@@ -130,7 +136,6 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		this.tracer.setRelativePosition(1, 1) ;
 	}
 	
-
 	@Override
 	public void	start() throws ComponentStartException{
 		super.start();
@@ -141,28 +146,120 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 	public void execute() throws Exception{
 		super.execute();
 		this.createNewExecutorService(publishMessageURI, 5,true);
+		this.createNewExecutorService("temp", 2,true);
+		this.runTask("temp", (ignore) -> { 	// ignore : @Type ComponentI 
+	        try {
+	        	FinalSend();
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
+		this.runTask("temp", (ignore) -> { 	// ignore : @Type ComponentI 
+	        try {
+	        	PeriodSend();
+	        } catch (Exception e) {	
+	            e.printStackTrace();
+	        }
+	    });
 		logMessage("[Execute] done");
+	}
+	
+	private void FinalSend() throws Exception
+	{
+		while(true)
+		{
+			if (toSend.isEmpty())
+				synchronized (toSend) {
+					toSend.wait();					
+				}
+			System.out.println("[Broker:FinalSend] je me reveille ");
+			stackLock.writeLock().lock();
+			while(!toSend.isEmpty())
+			{
+				String sub = toSend.remove(0);
+				ReceptionOutboundPort ri = subsobp.get(sub);
+				if (stack.get(sub).size() == 1)
+					ri.acceptMessage(stack.get(sub).get(0));
+				else
+					ri.acceptMessage(stack.get(sub).get(0)); // TODO changer accepteMessage ArrayList
+				stack.get(sub).removeAll(stack.get(sub));
+				hasToUpdate.put(sub, false);
+			}
+			stackLock.writeLock().unlock();
+		}
+	}
+	
+	private void PeriodSend() throws Exception
+	{
+		boolean hasTonotify;
+		while (true)
+		{
+			synchronized (hasToUpdate) {
+				hasToUpdate.wait(BUFFER_TIME);
+			}
+			hasTonotify = false;
+			stackLock.readLock().lock();
+			for(Map.Entry<String, Boolean> entry: hasToUpdate.entrySet())
+			{
+				if (entry.getValue() && (stack.get(entry.getKey()) == null || !stack.get(entry.getKey()).isEmpty()))
+				{
+					hasTonotify = true;
+					toSend.add(entry.getKey());
+				}
+				else
+				{
+					entry.setValue(true);
+				}
+			}
+			stackLock.readLock().unlock();
+			if (hasTonotify)
+				synchronized (toSend) {
+					System.out.println("Ca marche");
+					toSend.notify();
+				}
+		
+		}
 	}
 	
 	/**
 	 * lecture abonnements
 	 * lecture subsobp; 
 	*/
-	public  void  sendpublished(MessageI m,String topic)throws Exception {
-		ArrayList<Couple> uris = abonnements.get(topic);
+	public  void  sendpublished(MessageI m,String topic)throws Exception {		
+		ArrayList<Couple> uris = abonnements.get(topic);		
+		ArrayList<MessageI> messages;
 		lock.readLock().lock();
+		
 		if (uris != null)
 		{
+			//System.out.println("[Broker:sendpublished] il y'a " + uris.size() + " aboonnes");
 			for(Couple abonne_uri: uris)
 			{
 				ReceptionOutboundPort ri = subsobp.get(abonne_uri.getUri());
 				if (ri != null)
 				{
-					logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri.getUri());
-					
-					if ((abonne_uri.hasFiltre() && abonne_uri.getFiltre().filter(m)) || !abonne_uri.hasFiltre())
+					logMessage("[sendpublished] try to send \"" +m.getPayload()  + "\" to " + abonne_uri.getUri());		
+					if (!abonne_uri.hasFiltre() || (abonne_uri.hasFiltre() && abonne_uri.getFiltre().filter(m)))
 					{
-						ri.acceptMessage(m);
+						//ri.acceptMessage(m);
+						stackLock.writeLock().lock();
+						messages = stack.get(abonne_uri.getUri());
+						if (messages == null)
+						{
+							messages = new ArrayList<>();
+							stack.put(abonne_uri.getUri(), messages);
+						}
+						messages.add(m);
+						stackLock.writeLock().unlock();
+						if (messages.size() > BUFFER_MESSAGE)
+						{
+							toSend.add(abonne_uri.getUri());
+							synchronized (toSend) {
+								System.out.println("============Notify");
+								toSend.notify();							
+							}
+						}
+							
 					}
 				}
 				else
@@ -172,7 +269,10 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			}
 		}
 		if (uris == null || uris.isEmpty())
+			{
 			logMessage("[sendpulished] aucun abonner au topic :" + topic);
+			System.out.println("[sendpulished] aucun abonner au topic :" + topic);
+			}
 		else
 			System.out.println("[Broker:sendpublished] fin " + uris.size() + " for "+ topic);
 		lock.readLock().unlock();
@@ -186,6 +286,7 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 		try {
 			this.runTask(publishMessageURI, (ignore) -> { 	// ignore : @Type ComponentI 
 		        try {
+		        	
 		        	sendpublished(m, topic);
 		        } catch (Exception e) {	
 		            e.printStackTrace();
@@ -286,7 +387,8 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			String uriSub = inboundPortUri + nbSubscriber;
 			ReceptionOutboundPort ropTmp =  new ReceptionOutboundPort(uriSub,this);
 			ropTmp.publishPort();
-			subsobp.put(inboundPortUri, ropTmp);			
+			subsobp.put(inboundPortUri, ropTmp);
+			hasToUpdate.put(inboundPortUri, false);
 			this.doPortConnection(uriSub, inboundPortUri, ReceptionConnector.class.getCanonicalName());
 			System.out.println("[Broker:subscribe] " + inboundPortUri + " doport connection done");
 		}
@@ -297,15 +399,18 @@ public class Broker extends AbstractComponent implements ManagementImplementatio
 			createTopic(topic);
 		}
 		subsriber = abonnements.get(topic);		
-		lock.writeLock().lock(); 
+		lock.readLock().lock();
 		for (Couple couple : subsriber) {
 			if (couple.getUri().equals(inboundPortUri))
 			{
 				logMessage("[subscribe] " + inboundPortUri + "est deja aboné au topic " + topic );
 				System.out.println("[Broker:subscribe]Vous etes deja abonné");		
+				lock.readLock().unlock();
 				return;
 			}
 		}
+		lock.readLock().unlock();
+		lock.writeLock().lock(); 
 		subsriber.add(new Couple(inboundPortUri, newFilter));
 		logMessage("[subscribe] " + inboundPortUri + " to " + topic + " done");
 		lock.writeLock().unlock();

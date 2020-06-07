@@ -9,7 +9,7 @@ import messages.Properties;
 
 public class SubscriberScenario {
 
-	private static final int SIZECHAOS = 10000;
+	private static final int SIZECHAOS = 1000;
 
 	public static void testCompletTopicSubcribe(Subscriber sub)
 	{
@@ -155,7 +155,7 @@ public class SubscriberScenario {
 					res = p.getIntProp("randInt");
 				} catch (InexistentPropertyException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return false;
 				}
 				return res < (Math.random() * 42) || true;
 			}

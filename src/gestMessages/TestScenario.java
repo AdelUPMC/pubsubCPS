@@ -25,7 +25,14 @@ public class TestScenario {
 	private ArrayList<String> subscribersURI;
 	private ArrayList<String> publishersURI;
 	
-	
+	/**
+	 * Execute l'un des scenario cree a partir d'un identifiant 
+	 * execute le premier scenario basique si l'identifiant n'est pas reconnus
+	 * 
+	 * @param cvm
+	 * @param scenario String servant d'identifiant de scenario
+	 * @throws Exception
+	 */
 	private TestScenario(CVM cvm, String scenario) throws Exception
 	{
 		this.cvm = cvm;
@@ -70,8 +77,8 @@ public class TestScenario {
 		}
 	}
 	
-	
-	/*
+	/**
+	 * 	scenario basique 1 
 	 *  1 sub et 1 pub
 	 *  creation des topics 'A' , 'B', 'C'
 	 * 	sub1 abonner  au topic 'A' et 'B'
@@ -80,6 +87,8 @@ public class TestScenario {
 	 * 	pub1 publie un message avec le topic 'B'
 	 *  pub1 publie un message avec le topic 'A', 'B' et 'C'
 	 *  destruction des topics 'A' , 'B', 'C'
+
+	 * @throws Exception
 	 */
 	private void execute_scenario_basic1() throws Exception
 	{
@@ -90,16 +99,16 @@ public class TestScenario {
 	}
 
 	
-	/*
+	/**
+	 *	Scenario basique 2 
 	 * 	 2 sub et 2 pub 
-	 * 
 	 * 	creation des topics 'A' et 'C'
 	 * 	sub1 abonner  au topic 'A' et 'B' 
 	 * 	sub2 abonner au topic 'B' et 'C' (filtre sur la "size")
+	 * 	pub1 publie un message avec le topic 'A' , 'B' et 'C' (sans filtre)
+	 * 	pub2 publie un message sur 'A' et 'C' avec une propriete size = 10
 	 * 
-	 * pub1 publie un message avec le topic 'A' , 'B' et 'C' (sans filtre)
-	 * pub2 publie un message sur 'A' et 'C' avec une propriete size = 10
-	 * 
+	 * @throws Exception
 	 */
 	private void execute_scenario_basic2() throws Exception
 	{
@@ -115,16 +124,12 @@ public class TestScenario {
 		cvm.toggleTracing(this.publishersURI.get(1));
 	}
 	
-	/*
+	
+	/**
+	 *	Scenario Normal1 
 	 * 	 4 sub et 4 pub 
 	 * 
-	 * 	creation des topics 'A' et 'C'
-	 * 	sub1 abonner  au topic 'A' et 'B' 
-	 * 	sub2 abonner au topic 'B' et 'C' (filtre sur la "size")
-	 * 
-	 * pub1 publie un message avec le topic 'A' , 'B' et 'C' (sans filtre)
-	 * pub2 publie un message sur 'A' et 'C' avec une propriete size = 10
-	 * 
+	 * @throws Exception
 	 */
 	private void execute_scenario_normal1() throws Exception
 	{

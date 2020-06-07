@@ -120,13 +120,19 @@ public class Subscriber extends AbstractComponent implements ReceptionImplementa
 	
 	//ReceptionCI
 	public void acceptMessage(MessageI m) throws Exception {
+		
 		System.out.println("[Subsrciber:Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 		this.logMessage("[Accept message] " + m.getURI() + " a recu ce message => " + m.getPayload());
 	}
-	public void acceptMessages(MessageI[] ms) throws Exception {
-		for (MessageI m : ms) {
-			acceptMessage(m);
-	    }
+	public void acceptMessages(MessageI[] ms) throws Exception
+	{
+		this.logMessage("[Subscriber:acceptMessages] bloque de " + ms.length + " messages recus" );
+		
+		/*
+		 * for (MessageI m : ms) {
+		 *	acceptMessage(m);
+	     *     }
+		 */
 	}
 	
 	//ManagementCI
